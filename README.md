@@ -120,7 +120,51 @@ curl -X POST http://localhost:3000/api/reviews \
 curl http://localhost:3000/api/shelves/user/1
 ```
 
-See the API routes in `src/routes/api.ts` for full documentation.
+### Routes
+
+<!-- routes:start -->
+JSON API (`src/routes/api.ts`)
+
+| Method | Path | Body | Success | Errors |
+|---|---|---|---|---|
+| GET | `/api/books` | — | 200 book list | — |
+| GET | `/api/books/:id` | — | 200 book | 404 |
+| POST | `/api/books` | `title`, `author`, `isbn?`, `cover_url?`, `description?`, `published_year?` | 201 book | 400 |
+| PATCH | `/api/books/:id` | `title?`, `author?`, `isbn?`, `cover_url?`, `description?`, `published_year?` | 200 book | 404 |
+| DELETE | `/api/books/:id` | — | 204 | 404 |
+| GET | `/api/users` | — | 200 user list | — |
+| GET | `/api/users/:id` | — | 200 user | 404 |
+| POST | `/api/users` | `username`, `displayName` | 201 user | 400 |
+| PATCH | `/api/users/:id` | `username?`, `displayName?` | 200 user | 404 |
+| DELETE | `/api/users/:id` | — | 204 | 404 |
+| GET | `/api/reviews/book/:bookId` | — | 200 review list | — |
+| GET | `/api/reviews/user/:userId` | — | 200 review list | — |
+| GET | `/api/reviews/:id` | — | 200 review | 404 |
+| POST | `/api/reviews` | `userId`, `bookId`, `rating` (1–5), `reviewText?` | 201 review | 400, 409 |
+| PATCH | `/api/reviews/:id` | `rating?` (no range check), `reviewText?` | 200 review | 404 |
+| DELETE | `/api/reviews/:id` | — | 204 | 404 |
+| GET | `/api/shelves/user/:userId` | — | 200 shelf list | — |
+| GET | `/api/shelves/:id` | — | 200 shelf with books | 404 |
+| POST | `/api/shelves` | `userId`, `name` | 201 shelf | 400 |
+| DELETE | `/api/shelves/:id` | — | 204 | 404 |
+| POST | `/api/shelves/:id/books` | `bookId` | 201 `{ message }` | 400, 409 |
+| DELETE | `/api/shelves/:id/books/:bookId` | — | 204 | 404 |
+
+HTML pages (`src/routes/books.ts`, `shelves.ts`, `reviews.ts`)
+
+| Method | Path | Renders | Called by HTMX |
+|---|---|---|---|
+| GET | `/` | `books/index` page | no |
+| GET | `/books/search` | TODO: placeholder snippet, ignores `?q=` | yes, from `books/index` |
+| GET | `/books/:id` | `books/show` page (404 → `error`) | no |
+| POST | `/books/:id/reviews` | `books/reviews-list` partial; form `userId`, `rating`, `reviewText?` (400, 409 → error snippet) | yes, from `books/show` |
+| GET | `/shelves` | `shelves/index` page | no |
+| GET | `/shelves/user/:userId` | `shelves/user` page (404 → `error`) | no |
+| GET | `/shelves/:id` | `shelves/show` page (404 → `error`) | no |
+| POST | `/shelves/:id/books` | `shelves/books-list` partial; form `bookId` (400 → error snippet; duplicates ignored) | yes, from `shelves/show` |
+| DELETE | `/shelves/:id/books/:bookId` | `shelves/books-list` partial | yes, from `shelves/books-list` |
+| GET | `/reviews/:id` | `reviews/show` page (404 → `error`) | no |
+<!-- routes:end -->
 
 ## For Instructors
 
