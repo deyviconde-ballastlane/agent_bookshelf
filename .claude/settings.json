@@ -1,4 +1,13 @@
 {
+  "permissions": {
+    "deny": [
+      "Edit(/src/db/schema.sql)",
+      "Edit(/src/db/seed.sql)",
+      "Edit(/.claude/settings.json)",
+      "Edit(/.claude/settings.local.json)",
+      "Edit(/.claude/hooks/**)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
