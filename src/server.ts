@@ -30,7 +30,11 @@ app.use('/shelves', shelvesRouter);
 app.use('/reviews', reviewsRouter);
 app.use('/api', apiRouter);
 
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error & { status?: number; statusCode?: number }, req: Request, res: Response, next: NextFunction) => {
+  const status = err.status ?? err.statusCode;
+  if (status && status >= 400 && status < 500) {
+    return res.status(status).json({ error: err.message });
+  }
   console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });

@@ -6,6 +6,12 @@ import * as Shelf from '../models/shelf.js';
 
 const router = Router();
 
+const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v !== '';
+const isOptionalString = (v: unknown): boolean => v === undefined || v === null || typeof v === 'string';
+const isOptionalInt = (v: unknown): boolean => v === undefined || v === null || Number.isInteger(v);
+const isId = (v: unknown): v is number => Number.isInteger(v) && (v as number) > 0;
+const isRating = (v: unknown): v is number => Number.isInteger(v) && (v as number) >= 1 && (v as number) <= 5;
+
 // Books API
 router.get('/books', (req: Request, res: Response) => {
   const books = Book.getAllBooks();
@@ -26,8 +32,16 @@ router.get('/books/:id', (req: Request, res: Response) => {
 router.post('/books', (req: Request, res: Response) => {
   const { title, author, isbn, cover_url, description, published_year } = req.body;
 
-  if (!title || !author) {
+  if (!isNonEmptyString(title) || !isNonEmptyString(author)) {
     return res.status(400).json({ error: 'Title and author are required' });
+  }
+
+  if (!isOptionalString(isbn) || !isOptionalString(cover_url) || !isOptionalString(description) || !isOptionalInt(published_year)) {
+    return res.status(400).json({ error: 'Invalid book fields' });
+  }
+
+  if (typeof isbn === 'string' && Book.getBookByIsbn(isbn)) {
+    return res.status(409).json({ error: 'A book with this ISBN already exists' });
   }
 
   const book = Book.createBook({ title, author, isbn, cover_url, description, published_year });
@@ -36,6 +50,24 @@ router.post('/books', (req: Request, res: Response) => {
 
 router.patch('/books/:id', (req: Request, res: Response) => {
   const bookId = parseInt(req.params.id as string, 10);
+  const { title, author, isbn, cover_url, description, published_year } = req.body;
+
+  if ((title !== undefined && !isNonEmptyString(title)) || (author !== undefined && !isNonEmptyString(author)) ||
+      !isOptionalString(isbn) || !isOptionalString(cover_url) || !isOptionalString(description) || !isOptionalInt(published_year)) {
+    return res.status(400).json({ error: 'Invalid book fields' });
+  }
+
+  if (!Book.getBookById(bookId)) {
+    return res.status(404).json({ error: 'Book not found' });
+  }
+
+  if (typeof isbn === 'string') {
+    const other = Book.getBookByIsbn(isbn);
+    if (other && other.id !== bookId) {
+      return res.status(409).json({ error: 'A book with this ISBN already exists' });
+    }
+  }
+
   const book = Book.updateBook(bookId, req.body);
 
   if (!book) {
@@ -76,8 +108,12 @@ router.get('/users/:id', (req: Request, res: Response) => {
 router.post('/users', (req: Request, res: Response) => {
   const { username, displayName } = req.body;
 
-  if (!username || !displayName) {
+  if (!isNonEmptyString(username) || !isNonEmptyString(displayName)) {
     return res.status(400).json({ error: 'Username and displayName are required' });
+  }
+
+  if (User.getUserByUsername(username)) {
+    return res.status(409).json({ error: 'Username already taken' });
   }
 
   const user = User.createUser(username, displayName);
@@ -86,6 +122,23 @@ router.post('/users', (req: Request, res: Response) => {
 
 router.patch('/users/:id', (req: Request, res: Response) => {
   const userId = parseInt(req.params.id as string, 10);
+  const { username, displayName } = req.body;
+
+  if ((username !== undefined && !isNonEmptyString(username)) || (displayName !== undefined && !isNonEmptyString(displayName))) {
+    return res.status(400).json({ error: 'Username and displayName must be non-empty strings' });
+  }
+
+  if (!User.getUserById(userId)) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  if (username !== undefined) {
+    const other = User.getUserByUsername(username);
+    if (other && other.id !== userId) {
+      return res.status(409).json({ error: 'Username already taken' });
+    }
+  }
+
   const user = User.updateUser(userId, req.body);
 
   if (!user) {
@@ -137,8 +190,24 @@ router.post('/reviews', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'userId, bookId, and rating are required' });
   }
 
-  if (rating < 1 || rating > 5) {
+  if (!isId(userId) || !isId(bookId)) {
+    return res.status(400).json({ error: 'userId and bookId must be positive integers' });
+  }
+
+  if (!isRating(rating)) {
     return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+  }
+
+  if (!isOptionalString(reviewText)) {
+    return res.status(400).json({ error: 'reviewText must be a string' });
+  }
+
+  if (!User.getUserById(userId)) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  if (!Book.getBookById(bookId)) {
+    return res.status(404).json({ error: 'Book not found' });
   }
 
   const existing = Review.getReviewByUserAndBook(userId, bookId);
@@ -152,6 +221,16 @@ router.post('/reviews', (req: Request, res: Response) => {
 
 router.patch('/reviews/:id', (req: Request, res: Response) => {
   const reviewId = parseInt(req.params.id as string, 10);
+  const { rating, reviewText } = req.body;
+
+  if (rating !== undefined && !isRating(rating)) {
+    return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+  }
+
+  if (!isOptionalString(reviewText)) {
+    return res.status(400).json({ error: 'reviewText must be a string' });
+  }
+
   const review = Review.updateReview(reviewId, req.body);
 
   if (!review) {
@@ -193,8 +272,16 @@ router.get('/shelves/:id', (req: Request, res: Response) => {
 router.post('/shelves', (req: Request, res: Response) => {
   const { userId, name } = req.body;
 
-  if (!userId || !name) {
+  if (!isId(userId) || !isNonEmptyString(name)) {
     return res.status(400).json({ error: 'userId and name are required' });
+  }
+
+  if (!User.getUserById(userId)) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  if (Shelf.getShelvesByUserId(userId).some((s) => s.name === name)) {
+    return res.status(409).json({ error: 'Shelf with this name already exists' });
   }
 
   const shelf = Shelf.createShelf(userId, name);
@@ -216,8 +303,20 @@ router.post('/shelves/:id/books', (req: Request, res: Response) => {
   const shelfId = parseInt(req.params.id as string, 10);
   const { bookId } = req.body;
 
-  if (!bookId) {
+  if (!isId(shelfId)) {
+    return res.status(400).json({ error: 'Invalid shelf id' });
+  }
+
+  if (!isId(bookId)) {
     return res.status(400).json({ error: 'bookId is required' });
+  }
+
+  if (!Shelf.getShelfById(shelfId)) {
+    return res.status(404).json({ error: 'Shelf not found' });
+  }
+
+  if (!Book.getBookById(bookId)) {
+    return res.status(404).json({ error: 'Book not found' });
   }
 
   const added = Shelf.addBookToShelf(shelfId, bookId);

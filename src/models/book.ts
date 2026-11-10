@@ -30,9 +30,13 @@ export function searchBooks(query: string): Book[] {
 export function createBook(data: Omit<Book, 'id' | 'created_at'>): Book {
   const result = run(
     'INSERT INTO books (title, author, isbn, cover_url, description, published_year) VALUES (?, ?, ?, ?, ?, ?)',
-    [data.title, data.author, data.isbn, data.cover_url, data.description, data.published_year]
+    [data.title, data.author, data.isbn ?? null, data.cover_url ?? null, data.description ?? null, data.published_year ?? null]
   );
   return getBookById(result.lastInsertRowid)!;
+}
+
+export function getBookByIsbn(isbn: string): Book | undefined {
+  return get('SELECT * FROM books WHERE isbn = ?', [isbn]) as unknown as Book | undefined;
 }
 
 export function updateBook(id: number, data: Partial<Omit<Book, 'id' | 'created_at'>>): Book | undefined {
