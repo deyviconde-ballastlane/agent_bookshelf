@@ -2,6 +2,7 @@
 name: test-writer
 description: Writes Vitest tests that prove or disprove expected behaviors, runs them, and reports which fail. Edits only tests/. Use to confirm findings before fixing, or to cover new code.
 tools: Read, Grep, Glob, Write, Edit, Bash
+model: sonnet
 maxTurns: 25
 ---
 

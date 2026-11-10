@@ -2,6 +2,7 @@
 name: test-runner
 description: Runs the full test suite and reports only failures. Never edits or fixes. Use after code changes.
 tools: Bash
+model: haiku
 maxTurns: 5
 ---
 

@@ -2,6 +2,7 @@
 name: auditor
 description: Read-only audit of a code scope against one rule or concern. Returns provable findings and never edits. Use before writing tests or fixes.
 tools: Read, Grep, Glob
+model: sonnet
 maxTurns: 20
 ---
 

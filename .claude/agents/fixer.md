@@ -2,6 +2,7 @@
 name: fixer
 description: Fixes confirmed defects, each backed by a failing test, with the smallest possible change. Never edits tests. Use after test-writer has confirmed the bugs.
 tools: Read, Grep, Glob, Edit, Bash
+model: sonnet
 maxTurns: 25
 ---
 

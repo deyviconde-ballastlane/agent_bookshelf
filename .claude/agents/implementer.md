@@ -2,6 +2,7 @@
 name: implementer
 description: Builds new behavior from a written brief (outcome, context, constraints, done when, verify). Use for features, not for bug fixes.
 tools: Read, Grep, Glob, Write, Edit, Bash
+model: sonnet
 maxTurns: 40
 ---
 
