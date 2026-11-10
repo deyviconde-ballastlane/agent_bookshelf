@@ -19,6 +19,10 @@ export function getBookById(id: number): Book | undefined {
   return get('SELECT * FROM books WHERE id = ?', [id]) as unknown as Book | undefined;
 }
 
+export function getBookByIsbn(isbn: string): Book | undefined {
+  return get('SELECT * FROM books WHERE isbn = ?', [isbn]) as unknown as Book | undefined;
+}
+
 export function searchBooks(query: string): Book[] {
   const pattern = `%${query}%`;
   return all(

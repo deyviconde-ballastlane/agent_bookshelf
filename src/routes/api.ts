@@ -30,13 +30,49 @@ router.post('/books', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Title and author are required' });
   }
 
-  const book = Book.createBook({ title, author, isbn, cover_url, description, published_year });
+  if (typeof title !== 'string' || typeof author !== 'string') {
+    return res.status(400).json({ error: 'Title and author must be strings' });
+  }
+  const optional = [isbn, cover_url, description];
+  if (optional.some((v) => v !== undefined && v !== null && typeof v !== 'string')) {
+    return res.status(400).json({ error: 'isbn, cover_url and description must be strings' });
+  }
+  if (published_year !== undefined && published_year !== null && typeof published_year !== 'number') {
+    return res.status(400).json({ error: 'published_year must be a number' });
+  }
+  if (isbn && Book.getBookByIsbn(isbn)) {
+    return res.status(409).json({ error: 'A book with this isbn already exists' });
+  }
+
+  const book = Book.createBook({
+    title,
+    author,
+    isbn: isbn ?? null,
+    cover_url: cover_url ?? null,
+    description: description ?? null,
+    published_year: published_year ?? null,
+  });
   res.status(201).json(book);
 });
 
 router.patch('/books/:id', (req: Request, res: Response) => {
   const bookId = parseInt(req.params.id as string, 10);
-  const book = Book.updateBook(bookId, req.body);
+  const body = req.body ?? {};
+  for (const k of ['title', 'author', 'isbn', 'cover_url', 'description']) {
+    if (body[k] !== undefined && typeof body[k] !== 'string') {
+      return res.status(400).json({ error: `${k} must be a string` });
+    }
+  }
+  if (body.published_year !== undefined && typeof body.published_year !== 'number') {
+    return res.status(400).json({ error: 'published_year must be a number' });
+  }
+  if (body.isbn) {
+    const dup = Book.getBookByIsbn(body.isbn);
+    if (dup && dup.id !== bookId) {
+      return res.status(409).json({ error: 'A book with this isbn already exists' });
+    }
+  }
+  const book = Book.updateBook(bookId, body);
 
   if (!book) {
     return res.status(404).json({ error: 'Book not found' });
@@ -80,13 +116,32 @@ router.post('/users', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Username and displayName are required' });
   }
 
+  if (typeof username !== 'string' || typeof displayName !== 'string') {
+    return res.status(400).json({ error: 'Username and displayName must be strings' });
+  }
+  if (User.getUserByUsername(username)) {
+    return res.status(409).json({ error: 'Username already taken' });
+  }
+
   const user = User.createUser(username, displayName);
   res.status(201).json(user);
 });
 
 router.patch('/users/:id', (req: Request, res: Response) => {
   const userId = parseInt(req.params.id as string, 10);
-  const user = User.updateUser(userId, req.body);
+  const body = req.body ?? {};
+  for (const k of ['username', 'displayName']) {
+    if (body[k] !== undefined && typeof body[k] !== 'string') {
+      return res.status(400).json({ error: `${k} must be a string` });
+    }
+  }
+  if (body.username) {
+    const dup = User.getUserByUsername(body.username);
+    if (dup && dup.id !== userId) {
+      return res.status(409).json({ error: 'Username already taken' });
+    }
+  }
+  const user = User.updateUser(userId, body);
 
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
@@ -137,8 +192,15 @@ router.post('/reviews', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'userId, bookId, and rating are required' });
   }
 
-  if (rating < 1 || rating > 5) {
-    return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+  if (typeof rating !== 'number' || !Number.isInteger(rating) || rating < 1 || rating > 5) {
+    return res.status(400).json({ error: 'Rating must be an integer between 1 and 5' });
+  }
+
+  if (!User.getUserById(userId)) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+  if (!Book.getBookById(bookId)) {
+    return res.status(404).json({ error: 'Book not found' });
   }
 
   const existing = Review.getReviewByUserAndBook(userId, bookId);
@@ -152,6 +214,10 @@ router.post('/reviews', (req: Request, res: Response) => {
 
 router.patch('/reviews/:id', (req: Request, res: Response) => {
   const reviewId = parseInt(req.params.id as string, 10);
+  const rating = req.body?.rating;
+  if (rating !== undefined && (typeof rating !== 'number' || !Number.isInteger(rating) || rating < 1 || rating > 5)) {
+    return res.status(400).json({ error: 'Rating must be an integer between 1 and 5' });
+  }
   const review = Review.updateReview(reviewId, req.body);
 
   if (!review) {
@@ -197,6 +263,16 @@ router.post('/shelves', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'userId and name are required' });
   }
 
+  if (typeof name !== 'string') {
+    return res.status(400).json({ error: 'name must be a string' });
+  }
+  if (!User.getUserById(userId)) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+  if (Shelf.getShelvesByUserId(userId).some((s) => s.name === name)) {
+    return res.status(409).json({ error: 'Shelf name already exists for this user' });
+  }
+
   const shelf = Shelf.createShelf(userId, name);
   res.status(201).json(shelf);
 });
@@ -218,6 +294,13 @@ router.post('/shelves/:id/books', (req: Request, res: Response) => {
 
   if (!bookId) {
     return res.status(400).json({ error: 'bookId is required' });
+  }
+
+  if (!Shelf.getShelfById(shelfId)) {
+    return res.status(404).json({ error: 'Shelf not found' });
+  }
+  if (!Book.getBookById(bookId)) {
+    return res.status(404).json({ error: 'Book not found' });
   }
 
   const added = Shelf.addBookToShelf(shelfId, bookId);
