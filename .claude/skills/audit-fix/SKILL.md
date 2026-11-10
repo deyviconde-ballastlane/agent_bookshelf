@@ -22,6 +22,8 @@ Return: (the format from the agent's own file)
 
 Pass results between agents verbatim. Don't summarize or re-check them.
 
+Each agent is fenced by `.claude/hooks/agent-guard.mjs` (what it may write and run). If an agent reports a block, a crash or a command it couldn't run: stop the pipeline, show the report to the user as is, and don't redo that agent's work yourself.
+
 ## Steps (pipeline: each step starts when the previous one returns)
 
 1. **auditor.** Task: audit `<scope>` against `<rule>`. Context: the rule's text from CLAUDE.md if it refers to one. If it returns `0 findings`, stop and report that.
