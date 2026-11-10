@@ -1,71 +1,73 @@
-# Week 2: flujo multi-agente, costo antes y después
+# Week 2: multi-agent flow, cost before and after
 
-**Tarea:** auditar la API JSON contra la regla 5 del CLAUDE.md (los errores son 400/404/409, nunca 500), probar cada hallazgo con un test que falle y arreglar los confirmados.
+**Task: audit the JSON API against CLAUDE.md rule 5 (errors are 400/404/409, never 500), prove each finding with a failing test, and fix the confirmed ones.**
 
-**Flujo:** `/audit-fix` (`.claude/skills/audit-fix/`) encadena cuatro subagentes genéricos de `.claude/agents/` en un pipeline:
+**Flow:** `/audit-fix` (`.claude/skills/audit-fix/`) chains four generic subagents from `.claude/agents/` in a pipeline:
 
 ```
 auditor  →  test-writer  →  fixer  →  test-runner
-(lee)       (prueba)        (arregla)  (verifica)
+(reads)     (proves)        (fixes)   (verifies)
 ```
 
-**Palanca:** el modelo de cada subagente. Nada más cambió entre las corridas: mismo commit base, mismo comando, mismo modelo de sesión (Opus 5.5) y auto mode activado en ambas.
+**Lever:** model per subagent. Nothing else changed between runs: same base commit, same command, same session model (Opus 5.5), auto mode on in both.
 
 ```
 /audit-fix "CLAUDE.md rule 5: API errors use 400/404/409, never 500" src/routes/api.ts
 ```
 
-| | Corrida A | Corrida B |
+**Guardrails (added after the runs):** each agent's frontmatter has a `PreToolUse` hook that calls `.claude/hooks/agent-guard.mjs` with its role. The guard is an allowlist: the auditor only reads; the test-runner may only run `npm run test:run`; the test-writer writes only under `tests/` and the fixer only under `src/`, and both may only run tests. Everything else is blocked, and the agent must report the block to the orchestrator. Runs A and B ran without guardrails (commits `811b2d5` and `bd0e787`). Bypass battery: `node --test tests/hooks/*.test.mjs`.
+
+| | Run A | Run B |
 |---|---|---|
-| Modelo de los subagentes | heredan (Opus 5.5) | Sonnet 5.5, test-runner en Haiku 5.5 |
-| Commit de los agentes | `811b2d5` | `bd0e787` |
-| Rama / commit del output | `week2-run-a` / `736f36f` | `week2-run-b` / `2f32ac2` |
-| **Costo total (/usage)** | **$2.17** | **$0.93** (−57%) |
-| Duración API / reloj | 7m 36s / 7m 35s | 2m 53s / 3m 17s |
-| Cambios de código | +148 / −4 | +97 / −6 |
-| Caché del main | 9 requests, 93% desde caché, sin misses | 11 requests, 94% desde caché, sin misses |
-| Hallazgos confirmados y arreglados | 15 / 15 | 12 / 12 |
-| Suite completa al final | 29 en verde | 26 en verde |
+| Subagent models | inherit (Opus 5.5) | Sonnet 5.5, test-runner on Haiku 5.5 |
+| Agent files commit | `811b2d5` | `bd0e787` |
+| Output branch / commit | `week2-run-a` / `736f36f` | `week2-run-b` / `2f32ac2` |
+| **Total cost (/usage)** | **$2.17** | **$0.93** (−57%) |
+| Duration API / wall | 7m 36s / 7m 35s | 2m 53s / 3m 17s |
+| Code changes | +148 / −4 | +97 / −6 |
+| Main prompt cache | 9 requests, 93% from cache, no misses | 11 requests, 94% from cache, no misses |
+| Findings confirmed and fixed | 15 / 15 | 12 / 12 |
+| Full suite after | 29 passed | 26 passed |
 
-## /usage tal como salió
+## /usage, as shown
 
-Screenshots: [corrida A](usage-run-a.png), [corrida B](usage-run-b.png).
+Screenshots: [run A](usage-run-a.png), [run B](usage-run-b.png).
 
 ```
-Corrida A
+Run A
 claude-haiku-5-5:  13.7k input, 911 output, 0 cache read, 0 cache write ($0.0018)
 claude-opus-5-5:   2.5k input, 46.2k output, 1.7m cache read, 156.4k cache write ($2.17)
 
-Corrida B
+Run B
 claude-haiku-5-5:  3.6k input, 1.1k output, 4.9k cache read, 7.1k cache write ($0.0019)
 claude-opus-5-5:   1.0k input, 8.4k output, 711.1k cache read, 35.6k cache write ($0.60)
 claude-sonnet-5-5: 32 input, 14.4k output, 170.5k cache read, 65.7k cache write ($0.3256)
 ```
 
-En la corrida A, la línea de Haiku son llamadas internas de Claude Code, no un agente nuestro.
+In run A, the Haiku line is Claude Code's own background calls, not one of our agents.
 
-## Costo por agente, sacado de los logs de sesión
+## Cost per agent, from the session logs
 
-`python3 docs/week2/cost_by_agent.py ~/.claude/projects/<proyecto>/<sesión>.jsonl` calcula el precio de cada request con los precios de lista de la week 2. Los totales quedan a menos de 5% de lo que dice /usage.
+`python3 docs/week2/cost_by_agent.py ~/.claude/projects/<project>/<session>.jsonl` prices each request with the week 2 list prices. Totals land within 5% of /usage.
 
-| Agente | A: modelo | A: requests | A: costo | B: modelo | B: requests | B: costo |
+| Agent | A: model | A: requests | A: cost | B: model | B: requests | B: cost |
 |---|---|---|---|---|---|---|
-| orquestador (main) | Opus | 9 | $0.61 | Opus | 11 | $0.56 |
+| orchestrator (main) | Opus | 9 | $0.61 | Opus | 11 | $0.56 |
 | auditor | Opus | 12 | $0.50 | Sonnet | 4 | $0.11 |
 | test-writer | Opus | 11 | $0.36 | Sonnet | 5 | $0.08 |
 | fixer | Opus | 14 | $0.55 | Sonnet | 6 | $0.14 |
 | test-runner | Opus | 2 | $0.05 | Haiku | 2 | $0.00 |
-| **subagentes** | | | **$1.46** | | | **$0.33** (−77%) |
+| **subagents** | | | **$1.46** | | | **$0.33** (−77%) |
 | **total** | | | **$2.08** | | | **$0.89** |
 
-El orquestador casi no cambió, que era lo esperado: la palanca solo tocó a los subagentes. El ahorro viene de dos lados: menor precio por token y menos requests, porque los agentes en Sonnet exploraron menos.
+The orchestrator barely moved, as expected: the lever only touched subagents. The saving comes from two places: a lower price per token, and fewer requests, because the Sonnet agents explored less.
 
-## ¿Se mantuvo la calidad?
+## Did quality hold?
 
-No del todo.
+Not entirely.
 
-- **Cobertura:** el auditor de la B encontró 12 problemas y el de la A, 15. La B juntó dos hallazgos de la A en un solo test y nunca detectó "username es un objeto" ni "id de estante no numérico".
-- **Prueba cruzada:** los 15 tests de la A, corridos contra el código de la B, dan **14 en verde y 1 en rojo**: `#14 POST /api/shelves/abc/books` no devuelve 400. Un bug real sobrevivió a la corrida B.
-- **Tests más flojos:** tres tests de la B aceptan dos códigos de estado (`201 o 400`, `404 o 400`), mientras que los de la A exigen uno solo.
+- **Coverage:** the run B auditor found 12 issues and the run A auditor found 15. B merged two of A's findings into one test and never raised "username is an object" or "non-numeric shelf id".
+- **Cross-check:** run A's 15 tests, run against run B's code, give **14 passed, 1 failed**: `#14 POST /api/shelves/abc/books` doesn't return 400. One real bug survived run B.
+- **Test strictness:** three of run B's tests accept two status codes (`201 or 400`, `404 or 400`), where run A pins one.
 
-La corrida B es 57% más barata y el doble de rápida, pero se le escapa un bug real y escribe tests más flojos. El set de evals de la semana 3 debería medir justo esta diferencia.
+Run B is 57% cheaper and twice as fast, but it misses one real bug and writes looser tests. Week 3's eval set should measure exactly this trade.
