@@ -1,0 +1,266 @@
+{
+  "model": "claude-sonnet-5-5",
+  "session": "92848823-8dbb-43c1-af06-8cca5cd5aff2",
+  "cost": 0.30219830000000003,
+  "seconds": 21.281,
+  "passed": 32,
+  "total": 32,
+  "cases": [
+    {
+      "id": "c01",
+      "request": "c01  GET /api/books/999",
+      "actual": 404,
+      "truth": "OK",
+      "verdict": "OK",
+      "pass": true
+    },
+    {
+      "id": "c02",
+      "request": "c02  POST /api/books  {\"title\":\"T\",\"author\":\"A\"}",
+      "actual": 500,
+      "truth": "VIOLATES",
+      "verdict": "VIOLATES",
+      "pass": true
+    },
+    {
+      "id": "c03",
+      "request": "c03  POST /api/users  {\"username\":\"alice\",\"displayName\":\"Dup\"}",
+      "actual": 500,
+      "truth": "VIOLATES",
+      "verdict": "VIOLATES",
+      "pass": true
+    },
+    {
+      "id": "c04",
+      "request": "c04  POST /api/books  {}",
+      "actual": 400,
+      "truth": "OK",
+      "verdict": "OK",
+      "pass": true
+    },
+    {
+      "id": "c05",
+      "request": "c05  POST /api/books  {\"title\":\"T\",\"author\":\"A\",\"isbn\":\"000-EVAL\",\"cover_url\":null,\"description\":null,\"published_year\":2020}",
+      "actual": 201,
+      "truth": "OK",
+      "verdict": "OK",
+      "pass": true
+    },
+    {
+      "id": "c06",
+      "request": "c06  POST /api/books  {\"title\":\"T\",\"author\":\"A\",\"isbn\":\"978-0201616224\",\"cover_url\":null,\"description\":null,\"published_year\":null}",
+      "actual": 500,
+      "truth": "VIOLATES",
+      "verdict": "VIOLATES",
+      "pass": true
+    },
+    {
+      "id": "c07",
+      "request": "c07  PATCH /api/books/1  {\"isbn\":\"978-0132350884\"}",
+      "actual": 500,
+      "truth": "VIOLATES",
+      "verdict": "VIOLATES",
+      "pass": true
+    },
+    {
+      "id": "c08",
+      "request": "c08  PATCH /api/books/999  {\"title\":\"x\"}",
+      "actual": 404,
+      "truth": "OK",
+      "verdict": "OK",
+      "pass": true
+    },
+    {
+      "id": "c09",
+      "request": "c09  PATCH /api/books/1  {\"title\":null}",
+      "actual": 500,
+      "truth": "VIOLATES",
+      "verdict": "VIOLATES",
+      "pass": true
+    },
+    {
+      "id": "c10",
+      "request": "c10  DELETE /api/books/999",
+      "actual": 404,
+      "truth": "OK",
+      "verdict": "OK",
+      "pass": true
+    },
+    {
+      "id": "c11",
+      "request": "c11  GET /api/users/999",
+      "actual": 404,
+      "truth": "OK",
+      "verdict": "OK",
+      "pass": true
+    },
+    {
+      "id": "c12",
+      "request": "c12  PATCH /api/users/1  {\"username\":\"bob\"}",
+      "actual": 500,
+      "truth": "VIOLATES",
+      "verdict": "VIOLATES",
+      "pass": true
+    },
+    {
+      "id": "c13",
+      "request": "c13  POST /api/users  {\"username\":\"zoe\"}",
+      "actual": 400,
+      "truth": "OK",
+      "verdict": "OK",
+      "pass": true
+    },
+    {
+      "id": "c14",
+      "request": "c14  POST /api/users  {\"username\":{\"a\":1},\"displayName\":\"X\"}",
+      "actual": 500,
+      "truth": "VIOLATES",
+      "verdict": "VIOLATES",
+      "pass": true
+    },
+    {
+      "id": "c15",
+      "request": "c15  POST /api/users  {\"username\":\"zoe\",\"displayName\":\"Zoe\"}",
+      "actual": 201,
+      "truth": "OK",
+      "verdict": "OK",
+      "pass": true
+    },
+    {
+      "id": "c16",
+      "request": "c16  POST /api/users  raw body: {\"username\":",
+      "actual": 500,
+      "truth": "VIOLATES",
+      "verdict": "VIOLATES",
+      "pass": true
+    },
+    {
+      "id": "c17",
+      "request": "c17  POST /api/reviews  {\"userId\":1,\"bookId\":5,\"rating\":5,\"reviewText\":\"Great\"}",
+      "actual": 201,
+      "truth": "OK",
+      "verdict": "OK",
+      "pass": true
+    },
+    {
+      "id": "c18",
+      "request": "c18  POST /api/reviews  {\"userId\":1,\"bookId\":5,\"rating\":\"abc\"}",
+      "actual": 500,
+      "truth": "VIOLATES",
+      "verdict": "VIOLATES",
+      "pass": true
+    },
+    {
+      "id": "c19",
+      "request": "c19  POST /api/reviews  {\"userId\":1,\"bookId\":1,\"rating\":4,\"reviewText\":\"again\"}",
+      "actual": 409,
+      "truth": "OK",
+      "verdict": "OK",
+      "pass": true
+    },
+    {
+      "id": "c20",
+      "request": "c20  POST /api/reviews  {\"userId\":999,\"bookId\":5,\"rating\":5}",
+      "actual": 201,
+      "truth": "VIOLATES",
+      "verdict": "VIOLATES",
+      "pass": true
+    },
+    {
+      "id": "c21",
+      "request": "c21  POST /api/reviews  {\"userId\":1,\"bookId\":5,\"rating\":6,\"reviewText\":\"x\"}",
+      "actual": 400,
+      "truth": "OK",
+      "verdict": "OK",
+      "pass": true
+    },
+    {
+      "id": "c22",
+      "request": "c22  PATCH /api/reviews/1  {\"rating\":10}",
+      "actual": 500,
+      "truth": "VIOLATES",
+      "verdict": "VIOLATES",
+      "pass": true
+    },
+    {
+      "id": "c23",
+      "request": "c23  PATCH /api/reviews/1  {\"rating\":4}",
+      "actual": 200,
+      "truth": "OK",
+      "verdict": "OK",
+      "pass": true
+    },
+    {
+      "id": "c24",
+      "request": "c24  DELETE /api/reviews/1",
+      "actual": 204,
+      "truth": "OK",
+      "verdict": "OK",
+      "pass": true
+    },
+    {
+      "id": "c25",
+      "request": "c25  POST /api/shelves  {\"userId\":1,\"name\":\"read\"}",
+      "actual": 500,
+      "truth": "VIOLATES",
+      "verdict": "VIOLATES",
+      "pass": true
+    },
+    {
+      "id": "c26",
+      "request": "c26  POST /api/shelves  {\"name\":\"x\"}",
+      "actual": 400,
+      "truth": "OK",
+      "verdict": "OK",
+      "pass": true
+    },
+    {
+      "id": "c27",
+      "request": "c27  POST /api/shelves  {\"userId\":999,\"name\":\"x\"}",
+      "actual": 201,
+      "truth": "VIOLATES",
+      "verdict": "VIOLATES",
+      "pass": true
+    },
+    {
+      "id": "c28",
+      "request": "c28  POST /api/shelves  {\"userId\":1,\"name\":\"eval-shelf\"}",
+      "actual": 201,
+      "truth": "OK",
+      "verdict": "OK",
+      "pass": true
+    },
+    {
+      "id": "c29",
+      "request": "c29  POST /api/shelves/1/books  {\"bookId\":999}",
+      "actual": 201,
+      "truth": "VIOLATES",
+      "verdict": "VIOLATES",
+      "pass": true
+    },
+    {
+      "id": "c30",
+      "request": "c30  POST /api/shelves/1/books  {}",
+      "actual": 400,
+      "truth": "OK",
+      "verdict": "OK",
+      "pass": true
+    },
+    {
+      "id": "c31",
+      "request": "c31  POST /api/shelves/abc/books  {\"bookId\":1}",
+      "actual": 500,
+      "truth": "VIOLATES",
+      "verdict": "VIOLATES",
+      "pass": true
+    },
+    {
+      "id": "c32",
+      "request": "c32  DELETE /api/shelves/999/books/1",
+      "actual": 404,
+      "truth": "OK",
+      "verdict": "OK",
+      "pass": true
+    }
+  ]
+}
