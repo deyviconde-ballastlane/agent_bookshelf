@@ -1,6 +1,8 @@
 # Week 2: multi-agent flow, cost before and after
 
-**Task: audit the JSON API against CLAUDE.md rule 5 (errors are 400/404/409, never 500), prove each finding with a failing test, and fix the confirmed ones.**
+```
+Task: audit the JSON API against CLAUDE.md rule 5 (errors are 400/404/409, never 500), prove each finding with a failing test, and fix the confirmed ones.
+```
 
 **Flow:** `/audit-fix` (`.claude/skills/audit-fix/`) chains four generic subagents from `.claude/agents/` in a pipeline:
 
