@@ -20,7 +20,7 @@ function searchJson(req: Request, res: Response) {
 
 router.get('/books', (req: Request, res: Response) => {
   if (req.query.q !== undefined) {
-    return searchJson(req, res);
+    return res.json(Book.searchBooks(String(req.query.q).slice(0, Book.MAX_SEARCH_LENGTH)));
   }
   const books = Book.getAllBooks();
   res.json(books);

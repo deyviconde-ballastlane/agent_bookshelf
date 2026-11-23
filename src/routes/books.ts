@@ -15,7 +15,7 @@ router.get('/books/search', (req: Request, res: Response) => {
     res.render('books/search-results', { books });
   } catch (err) {
     if (err instanceof Book.SearchValidationError) {
-      return res.status(400).render('books/search-error', { message: err.message });
+      return res.render('books/search-error', { message: err.message });
     }
     throw err;
   }

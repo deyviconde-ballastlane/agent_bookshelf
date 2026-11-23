@@ -22,9 +22,11 @@ export function getBookById(id: number): Book | undefined {
 export const MAX_SEARCH_LENGTH = 100;
 
 export class SearchValidationError extends Error {
+  status: number;
   constructor(message: string) {
     super(message);
     this.name = 'SearchValidationError';
+    this.status = 400;
   }
 }
 
@@ -38,17 +40,18 @@ export function parseSearchQuery(raw: unknown): string {
 }
 
 export function searchBooks(query: string): Book[] {
-  const trimmed = parseSearchQuery(query).trim();
-  if (trimmed.length > MAX_SEARCH_LENGTH) {
-    throw new SearchValidationError(`Search query must be at most ${MAX_SEARCH_LENGTH} characters`);
+  const raw = parseSearchQuery(query);
+  if (raw.length > MAX_SEARCH_LENGTH) {
+    throw new SearchValidationError(`Search query "${raw.slice(0, 40)}..." is longer than ${MAX_SEARCH_LENGTH} characters`);
   }
-  if (trimmed === '') return getAllBooks();
+  const trimmed = raw.trim();
+  if (trimmed === '') return getAllBooks().slice(0, 25);
 
   const escaped = trimmed.replace(/[\\%_]/g, (c) => `\\${c}`);
-  const pattern = `%${escaped}%`;
+  const pattern = `${escaped}%`;
   return all(
-    "SELECT * FROM books WHERE title LIKE ? ESCAPE '\\' OR author LIKE ? ESCAPE '\\' ORDER BY title",
-    [pattern, pattern]
+    "SELECT * FROM books WHERE title LIKE ? ESCAPE '\\' OR instr(author, ?) > 0 ORDER BY title",
+    [pattern, trimmed]
   ) as unknown as Book[];
 }
 
