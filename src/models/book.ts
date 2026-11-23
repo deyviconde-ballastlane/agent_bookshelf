@@ -19,10 +19,35 @@ export function getBookById(id: number): Book | undefined {
   return get('SELECT * FROM books WHERE id = ?', [id]) as unknown as Book | undefined;
 }
 
+export const MAX_SEARCH_LENGTH = 100;
+
+export class SearchValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'SearchValidationError';
+  }
+}
+
+// Rule 8: a raw query-string value must be a single string (or missing).
+export function parseSearchQuery(raw: unknown): string {
+  if (raw === undefined) return '';
+  if (typeof raw !== 'string') {
+    throw new SearchValidationError('Search query must be a single text value');
+  }
+  return raw;
+}
+
 export function searchBooks(query: string): Book[] {
-  const pattern = `%${query}%`;
+  const trimmed = parseSearchQuery(query).trim();
+  if (trimmed.length > MAX_SEARCH_LENGTH) {
+    throw new SearchValidationError(`Search query must be at most ${MAX_SEARCH_LENGTH} characters`);
+  }
+  if (trimmed === '') return getAllBooks();
+
+  const escaped = trimmed.replace(/[\\%_]/g, (c) => `\\${c}`);
+  const pattern = `%${escaped}%`;
   return all(
-    'SELECT * FROM books WHERE title LIKE ? OR author LIKE ? ORDER BY title',
+    "SELECT * FROM books WHERE title LIKE ? ESCAPE '\\' OR author LIKE ? ESCAPE '\\' ORDER BY title",
     [pattern, pattern]
   ) as unknown as Book[];
 }

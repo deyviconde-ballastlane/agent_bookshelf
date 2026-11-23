@@ -111,6 +111,10 @@ curl http://localhost:3000/api/books
 # Get a specific book
 curl http://localhost:3000/api/books/1
 
+# Search books by title or author (400 if q is over 100 characters or not a single string)
+curl "http://localhost:3000/api/books/search?q=dune"
+curl "http://localhost:3000/api/books?q=dune"
+
 # Add a review
 curl -X POST http://localhost:3000/api/reviews \
   -H "Content-Type: application/json" \
