@@ -154,3 +154,20 @@ describe('searchBooks (BOOK-101)', () => {
     expect(Book.searchBooks('zzzz-no-such-book-zzzz')).toEqual([]);
   });
 });
+
+describe('searchBooks rule 8 (BOOK-101 finding)', () => {
+  it('rule 8: an array q is a validation error (model)', () => {
+    const Err = (Book as any).SearchValidationError;
+    expect(() => Book.searchBooks(['a', 'b'] as unknown as string)).toThrow(Err);
+  });
+
+  it('rule 8: an object q is a validation error (model)', () => {
+    const Err = (Book as any).SearchValidationError;
+    expect(() => Book.searchBooks({ a: 'b' } as unknown as string)).toThrow(Err);
+  });
+
+  it('rule 8: a single-element array q is a validation error (model)', () => {
+    const Err = (Book as any).SearchValidationError;
+    expect(() => Book.searchBooks(['dune'] as unknown as string)).toThrow(Err);
+  });
+});
