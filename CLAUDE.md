@@ -32,7 +32,7 @@ The current ticket is BOOK-101. Its spec is `SPEC.md`: read it before changing a
 7. Existing routes, exported functions and response shapes keep their exact shape. New behaviour is additive.
 8. JSON API errors use `res.status(code).json({ error: '...' })`: 400 invalid input, 404 not found, 409 conflict. Success: 201 on create, 204 on delete.
 9. Routes hit by HTMX (`hx-get`, `hx-post`) return a partial (no header/footer), rendered into the `hx-target`.
-10. The repo has other deliberate gaps (validation, tests, CSS). Do not fix anything the ticket does not ask for.
+10. The repo has other deliberate gaps (validation in other endpoints, missing tests, CSS). Leave them alone: fixing one is out of scope for this ticket.
 11. Verify with tests, not by starting the server.
 
 ## Gotchas

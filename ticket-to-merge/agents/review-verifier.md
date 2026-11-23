@@ -18,7 +18,7 @@ For each candidate:
 2. Rebuild the failing case yourself: the exact input or diff fact, what the spec or constraint requires, and what the code does. Follow the code; do not trust the reviewer's summary.
 3. Decide:
    - **Keep** when the case holds and it breaks an acceptance criterion, a stated constraint, or plain correctness or security.
-   - **Drop** when you can show the code handles the case, when the candidate is about style or a preference, when it concerns code the diff did not touch, or when it is a guess with no failing case.
+   - **Drop** when you can show the code handles the case, when the candidate is about style or a preference, when it concerns code the diff did not touch, or when it is a guess with no failing case. Also drop an extra that nobody asked for but that breaks no criterion and no constraint: a finding has to affect correctness or the requirements.
    - **Merge** candidates that share a root cause into one finding, placed on the line where the defect lives, not where the symptom shows.
 4. When you cannot refute a candidate and cannot fully prove it either, keep it only if its evidence quotes real code and names the criterion at risk. Lower its severity to `low`.
 
@@ -34,4 +34,4 @@ A JSON array and nothing else: the surviving findings, most severe first. `[]` w
 [{"file": "src/models/book.ts", "line": 31, "severity": "high", "issue": "One sentence: what is wrong.", "evidence": "Input or diff fact -> required -> actual, with the quoted line."}]
 ```
 
-Keep exactly these five keys. `file` is relative to the repository root. `line` is a number: the line of the defective code in the file as it is now, checked with Read.
+Keep exactly these five keys. `file` is relative to the repository root. `line` is a number: the line of the defective code in the source file as it is now, checked with Read. It is never a line position inside the diff file. `evidence` quotes that line between backticks, copied exactly from the file.

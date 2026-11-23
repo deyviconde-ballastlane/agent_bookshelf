@@ -1,5 +1,8 @@
 {
   "name": "ticket-to-merge",
-  "version": "0.1.0",
-  "description": "Take one ticket from spec to merge-ready: test-first build agents, read-only review agents, and a guardrail hook."
+  "version": "1.0.0",
+  "description": "Take one ticket from spec to merge-ready: test-first build agents, read-only review agents, and a guardrail hook.",
+  "author": {
+    "name": "deyviconde-ballastlane"
+  }
 }

@@ -1,0 +1,87 @@
+schema_version: "1.1"
+name: review-planted
+description: A branch with eight planted bugs and three harmless changes. The review should report the bugs and leave the harmless changes alone.
+tags: [review, should-flag]
+runs: 3
+context:
+  scaffold_script: fixture.sh
+execution:
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Agent, Bash]
+  prompt: |
+    Review this branch against main before I merge it. It implements ticket BOOK-101, "Search books by title or author".
+
+    Acceptance criteria:
+    - A query matches title or author: partial, case-insensitive
+    - An empty query returns all books
+    - Input is trimmed; over 100 characters returns a validation error
+    - SQL is parameterised: no string-built queries
+    - Vitest covers each criterion; npm run test:run passes
+
+    Constraints:
+    - No schema changes
+    - No new dependencies
+    - Never touch bookshelf.db, seed.sql or .env
+    - Keep the interface as it is on main
+
+    Report only real defects: bugs, security problems, weakened tests and broken constraints. Reply with a JSON array of findings and nothing else. Each finding has file, line, severity, issue and evidence. Reply with [] if the branch is clean.
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: 'review-pr'
+  - name: findings-are-structured
+    type: regex
+    pattern: '"file"\s*:\s*"[^"]+"[\s\S]{0,80}?"line"\s*:\s*\d+'
+    target: last_message
+  - name: p1-string-built-sql
+    type: regex
+    pattern: 'book\.ts[\s\S]{0,700}?(inject|interpolat|concaten|placeholder|parameteri)'
+    flags: i
+    target: last_message
+  - name: p2-length-boundary
+    type: regex
+    pattern: 'book\.ts[\s\S]{0,700}?(>=|exactly 100|off-by-one)'
+    flags: i
+    target: last_message
+  - name: p3-trim
+    type: regex
+    pattern: 'book\.ts[\s\S]{0,700}?(trimStart|trailing)'
+    flags: i
+    target: last_message
+  - name: p4-route-order
+    type: regex
+    pattern: 'api\.ts[\s\S]{0,700}?(:id|unreachable|shadow|never reach)'
+    flags: i
+    target: last_message
+  - name: p5-validation-error-swallowed
+    type: regex
+    pattern: 'api\.ts[\s\S]{0,700}?(400|validation error)'
+    flags: i
+    target: last_message
+  - name: p6-unescaped-html
+    type: regex
+    pattern: 'search-results\.ejs[\s\S]{0,700}?(<%-|unescaped|xss|escap)'
+    flags: i
+    target: last_message
+  - name: p7-test-weakened
+    type: regex
+    pattern: 'book-search\.test\.ts[\s\S]{0,700}?(200, 400|toContain|weaken|loosen)'
+    flags: i
+    target: last_message
+  - name: p8-schema-changed
+    type: regex
+    pattern: 'schema\.sql'
+    target: last_message
+  - name: clean-header-not-flagged
+    type: regex
+    pattern: 'Cache-Control|no-store'
+    flags: i
+    match: not_contains
+    target: last_message
+  - name: clean-null-check-not-flagged
+    type: regex
+    pattern: 'raw === null'
+    match: not_contains
+    target: last_message

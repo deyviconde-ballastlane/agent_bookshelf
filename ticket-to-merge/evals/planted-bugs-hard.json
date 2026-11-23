@@ -1,0 +1,95 @@
+{
+  "branch": "eval/planted-bugs-hard",
+  "base": "capstone",
+  "note": "A second, harder answer key. The first set is textbook bugs and every configuration scored 100% on it, so it could not tell two reviewer models apart. These eight are subtler: each one breaks a rule on one surface or in one edge case. `lines` are line numbers on the planted branch.",
+  "plants": [
+    {
+      "id": "H1",
+      "class": "order of validation",
+      "file": "src/models/book.ts",
+      "lines": [43, 47],
+      "keywords": ["before trim", "untrimmed", "raw\\.length", "after trimming", "padded", "before it is trimmed", "before the trim"],
+      "description": "The length is checked before trimming, so a 100-character query padded with spaces is rejected."
+    },
+    {
+      "id": "H2",
+      "class": "case sensitivity on one field",
+      "file": "src/models/book.ts",
+      "lines": [53, 54],
+      "keywords": ["instr", "case-sensitive", "case sensitive"],
+      "description": "The author is matched with instr(), which is case-sensitive, so 'TOLKIEN' no longer finds Tolkien."
+    },
+    {
+      "id": "H3",
+      "class": "partial match",
+      "file": "src/models/book.ts",
+      "lines": [51, 51],
+      "keywords": ["prefix", "leading", "starts with", "start of", "beginning", "middle"],
+      "description": "The title pattern lost its leading wildcard, so the title only matches from its first character."
+    },
+    {
+      "id": "H4",
+      "class": "silent limit",
+      "file": "src/models/book.ts",
+      "lines": [48, 48],
+      "keywords": ["slice\\(0, 25\\)", "25", "all books"],
+      "description": "An empty query returns only the first 25 books instead of all of them."
+    },
+    {
+      "id": "H5",
+      "class": "status code on one surface",
+      "file": "src/routes/books.ts",
+      "lines": [18, 18],
+      "keywords": ["200", "400", "status"],
+      "description": "The HTML route renders the validation error with status 200 instead of 400."
+    },
+    {
+      "id": "H6",
+      "class": "reflected XSS across two files",
+      "file": "src/views/books/search-error.ejs",
+      "lines": [1, 1],
+      "alsoFiles": ["src/models/book.ts"],
+      "keywords": ["xss", "unescaped", "<%-", "reflect", "not escaped", "script"],
+      "description": "The error message now echoes the query, and the error partial renders it with <%-, so the query is reflected into the page unescaped."
+    },
+    {
+      "id": "H7",
+      "class": "test that cannot fail",
+      "file": "tests/models/book-search.test.ts",
+      "lines": [97, 100],
+      "keywords": ["toBeDefined", "cannot fail", "can no longer fail", "weaken", "always pass"],
+      "description": "The author test now only checks that the result is defined, so it passes whatever the search returns. It hides H2."
+    },
+    {
+      "id": "H8",
+      "class": "validation skipped on one surface",
+      "file": "src/routes/api.ts",
+      "lines": [21, 25],
+      "keywords": ["truncat", "slice", "String\\(", "alias", "bypass"],
+      "description": "GET /api/books?q= truncates the query to 100 characters instead of returning a validation error, and turns a repeated q into the text 'a,b'."
+    }
+  ],
+  "clean": [
+    {
+      "id": "D1",
+      "file": "src/models/book.ts",
+      "lines": [25, 29],
+      "keywords": ["status: number", "this\\.status", "status field", "status property"],
+      "description": "The error class carries an unused status field. Harmless."
+    },
+    {
+      "id": "D2",
+      "file": "src/views/books/search-results.ejs",
+      "lines": [6, 6],
+      "keywords": ["search-hit", "class"],
+      "description": "An extra CSS class on the result card. Harmless."
+    },
+    {
+      "id": "D3",
+      "file": "tests/models/book-search.test.ts",
+      "lines": [153, 157],
+      "keywords": ["different books"],
+      "description": "A new, valid test."
+    }
+  ]
+}

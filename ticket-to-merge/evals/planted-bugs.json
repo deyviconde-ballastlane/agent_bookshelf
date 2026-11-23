@@ -1,0 +1,94 @@
+{
+  "branch": "eval/planted-bugs",
+  "base": "capstone",
+  "note": "Answer key for the reviewer eval. The planted branch forks from the capstone branch before this file was committed, so the reviewers cannot read it. `lines` are line numbers on the planted branch.",
+  "plants": [
+    {
+      "id": "P1",
+      "class": "injection",
+      "file": "src/models/book.ts",
+      "lines": [47, 50],
+      "keywords": ["inject", "interpolat", "concaten", "string-built", "placeholder", "parameteri", "wildcard", "escape"],
+      "description": "The query is interpolated into the SQL string instead of bound with ? placeholders. The LIKE wildcards are no longer escaped either."
+    },
+    {
+      "id": "P2",
+      "class": "boundary",
+      "file": "src/models/book.ts",
+      "lines": [42, 42],
+      "keywords": [">=", "exactly 100", "off-by-one", "boundary", "100 characters", "100-character"],
+      "description": "The length check uses >= instead of >, so a query of exactly 100 characters is rejected."
+    },
+    {
+      "id": "P3",
+      "class": "trim",
+      "file": "src/models/book.ts",
+      "lines": [41, 41],
+      "keywords": ["trimStart", "trailing", "trim"],
+      "description": "trim() became trimStart(), so trailing whitespace is kept and a padded query matches nothing."
+    },
+    {
+      "id": "P4",
+      "class": "route order",
+      "file": "src/routes/api.ts",
+      "lines": [29, 40],
+      "keywords": ["order", "unreachable", "never reach", "shadow", ":id", "registered after", "before"],
+      "description": "GET /api/books/search is registered after /api/books/:id, so 'search' is read as an id and the route is unreachable."
+    },
+    {
+      "id": "P5",
+      "class": "validation error swallowed",
+      "file": "src/routes/api.ts",
+      "lines": [13, 17],
+      "keywords": ["400", "validation error", "swallow", "empty array", "res\\.json\\(\\[\\]\\)"],
+      "description": "The JSON handler turns a validation error into 200 with an empty array instead of 400 with an error body."
+    },
+    {
+      "id": "P6",
+      "class": "XSS",
+      "file": "src/views/books/search-results.ejs",
+      "lines": [7, 7],
+      "keywords": ["xss", "unescaped", "escap", "<%-", "html"],
+      "description": "The book title is rendered with <%- instead of <%=, so stored HTML in a title is injected into the page."
+    },
+    {
+      "id": "P7",
+      "class": "test weakened",
+      "file": "tests/routes/book-search.test.ts",
+      "lines": [67, 70],
+      "keywords": ["weaken", "loosen", "200, 400", "toContain", "assertion"],
+      "description": "The 101-character test now accepts 200 or 400 and no longer checks the error body, which hides P5."
+    },
+    {
+      "id": "P8",
+      "class": "constraint: schema",
+      "file": "src/db/schema.sql",
+      "lines": [51, 51],
+      "keywords": ["schema", "index", "protected"],
+      "description": "A new index was added to the schema. The ticket forbids schema changes."
+    }
+  ],
+  "clean": [
+    {
+      "id": "C1",
+      "file": "src/models/book.ts",
+      "lines": [33, 33],
+      "keywords": ["null"],
+      "description": "parseSearchQuery treats null like undefined. Harmless: a query string never yields null."
+    },
+    {
+      "id": "C2",
+      "file": "src/routes/books.ts",
+      "lines": [15, 15],
+      "keywords": ["cache-control", "no-store"],
+      "description": "The HTML search response sets Cache-Control: no-store. Harmless and inside the ticket's own route."
+    },
+    {
+      "id": "C3",
+      "file": "tests/models/book-search.test.ts",
+      "lines": [97, 100],
+      "keywords": ["middle of a word"],
+      "description": "A new, valid test for a match in the middle of a word."
+    }
+  ]
+}

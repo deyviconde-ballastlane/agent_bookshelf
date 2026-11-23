@@ -1,0 +1,1116 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.322",
+  "startedAt": "2026-11-23T23:10:11.452Z",
+  "durationSeconds": 129,
+  "costUsd": 2.23631502,
+  "partial": false,
+  "suite": {
+    "root": "<repo>/ticket-to-merge",
+    "ablation": "with-without",
+    "modelOverride": "sonnet",
+    "judgeModel": "haiku",
+    "threshold": 1,
+    "concurrency": 4,
+    "plugins": [
+      {
+        "name": "ticket-to-merge",
+        "version": "1.0.0",
+        "path": "<repo>/ticket-to-merge"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "review-clean",
+      "dir": "evals/review-clean",
+      "source": "case_yaml",
+      "promptMarkdown": "Review this branch against main before I merge it. It is a small cleanup on top of ticket BOOK-101, \"Search books by title or author\".\n\nAcceptance criteria:\n- A query matches title or author: partial, case-insensitive\n- An empty query returns all books\n- Input is trimmed; over 100 characters returns a validation error\n- SQL is parameterised: no string-built queries\n- Vitest covers each criterion; npm run test:run passes\n\nConstraints:\n- No schema changes\n- No new dependencies\n- Never touch bookshelf.db, seed.sql or .env\n- Keep the interface as it is on main\n\nReport only real defects: bugs, security problems, weakened tests and broken constraints. Reply with a JSON array of findings and nothing else. Each finding has file, line, severity, issue and evidence. Reply with [] if the branch is clean.\n",
+      "runsPerCase": 3,
+      "timeoutSeconds": 900,
+      "maxTurns": 30,
+      "graders": [
+        {
+          "name": "skill-fired",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "review-pr"
+          }
+        },
+        {
+          "name": "reports-nothing",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "\"file\"\\s*:",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "says-clean",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "PASS if the reply reports no defects: an empty array, or a plain statement that nothing needs fixing. FAIL if the reply reports one or more bugs, security problems, weakened tests or broken constraints.",
+          "config": {
+            "criteria": "PASS if the reply reports no defects: an empty array, or a plain statement that nothing needs fixing. FAIL if the reply reports one or more bugs, security problems, weakened tests or broken constraints.",
+            "focus": "last_message"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.09896474999999999,
+            "judgeCostUsd": 0.00027219999999999995,
+            "durationSeconds": 25,
+            "startedAt": "2026-11-23T23:10:11.472Z",
+            "error": null,
+            "tracePath": "<tmp>/e-Mvl54D/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              },
+              {
+                "name": "reports-nothing",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "says-clean",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "```json\n[]\n```"
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 3,
+            "costUsd": 0.14254836999999998,
+            "judgeCostUsd": 0.00008559999999999997,
+            "durationSeconds": 35,
+            "startedAt": "2026-11-23T23:10:11.472Z",
+            "error": null,
+            "tracePath": "<tmp>/e-BkeQUF/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              },
+              {
+                "name": "reports-nothing",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "says-clean",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "```json\n[]\n```"
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.14878462000000006,
+            "judgeCostUsd": 0.00008559999999999997,
+            "durationSeconds": 36,
+            "startedAt": "2026-11-23T23:10:11.472Z",
+            "error": null,
+            "tracePath": "<tmp>/e-fHoWww/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              },
+              {
+                "name": "reports-nothing",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "says-clean",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "```json\n[]\n```"
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 15,
+            "costUsd": 0.15297790000000003,
+            "judgeCostUsd": 0.0003898,
+            "durationSeconds": 25,
+            "startedAt": "2026-11-23T23:10:11.472Z",
+            "error": null,
+            "tracePath": "<tmp>/e-KGfXa5/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "reports-nothing",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "says-clean",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "[]\n\nI read the branch's current source and tests, but two checks are missing, so treat `[]` as \"no defects found in what I could see\".\n\n- **No diff against main.** `git` failed in the sandbox and the shell was then denied. I couldn't confirm that `bookshelf.db`, `seed.sql` and `.env` are untouched, or that the interface matches main.\n- **No test run.** I couldn't run `npm run test:run`.\n\nIn the files I read, the search code is parameterised and escapes `%`, `_` and `\\`. It trims input, enforces the 100-character limit and returns all books for an empty query. The tests cover each criterion, with no `.skip` or `.only`. `package.json` has no new dependencies."
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 13,
+            "costUsd": 0.1451271,
+            "judgeCostUsd": 0.00040740000000000014,
+            "durationSeconds": 23,
+            "startedAt": "2026-11-23T23:10:36.078Z",
+            "error": null,
+            "tracePath": "<tmp>/e-2NbkXI/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "reports-nothing",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "says-clean",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  false
+                ],
+                "evidence": "I couldn't diff the branch against main, so this review is only partial. Bash was denied after git failed in the sandbox with a cache-file permission error. I read the current state of the search code, routes, views, db layer, `package.json` and both search test files instead. I did not run `npm run test:run`.\n\nI found no defects in the files I read:\n- The query is parameterised, with `%`, `_` and `\\` escaped.\n- Trimming happens before the 100-character check.\n- An empty query returns all books.\n- The search tests cover every acceptance criterion.\n- `package.json` shows no new dependencies.\n\nI could not check three things without the diff:\n- whether any tests were removed or weakened\n- whether `bookshelf.db`, `seed.sql` or `.env` were touched\n- whether the interface differs from main\n\nRun `git diff main...HEAD` yourself, or re-run me with Bash allowed, before treating this as clean.\n\n```json\n[]\n```"
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 16,
+            "costUsd": 0.1573975,
+            "judgeCostUsd": 0.0007202,
+            "durationSeconds": 24,
+            "startedAt": "2026-11-23T23:10:36.391Z",
+            "error": null,
+            "tracePath": "<tmp>/e-qRYAe7/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "reports-nothing",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "says-clean",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "[]\n\nThis `[]` comes from reading the working tree only. Bash was denied here: `git` failed in the sandbox, and a retry was refused. So I couldn't diff against `main`, which means I couldn't check the \"interface unchanged\" or \"protected files untouched\" constraints directly. I also couldn't run `npm run test:run`.\n\nWhat I read looks consistent with the acceptance criteria:\n- **Query handling:** `searchBooks` trims the query and enforces the 100-character limit. An empty query returns all books.\n- **SQL:** the search uses parameterised `LIKE ? ESCAPE`, with `%`, `_` and `\\` escaped.\n- **Output:** the EJS output is escaped.\n- **Tests:** the new tests cover each criterion, and I found no `.skip`, `.only` or `.todo` in them.\n\nPlease run `git diff main...HEAD --stat` and `npm run test:run` yourself to cover the gaps."
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1,
+        "scoreWithout": 1,
+        "passRateWithout": 1,
+        "delta": 0
+      }
+    },
+    {
+      "name": "review-planted",
+      "dir": "evals/review-planted",
+      "source": "case_yaml",
+      "promptMarkdown": "Review this branch against main before I merge it. It implements ticket BOOK-101, \"Search books by title or author\".\n\nAcceptance criteria:\n- A query matches title or author: partial, case-insensitive\n- An empty query returns all books\n- Input is trimmed; over 100 characters returns a validation error\n- SQL is parameterised: no string-built queries\n- Vitest covers each criterion; npm run test:run passes\n\nConstraints:\n- No schema changes\n- No new dependencies\n- Never touch bookshelf.db, seed.sql or .env\n- Keep the interface as it is on main\n\nReport only real defects: bugs, security problems, weakened tests and broken constraints. Reply with a JSON array of findings and nothing else. Each finding has file, line, severity, issue and evidence. Reply with [] if the branch is clean.\n",
+      "runsPerCase": 3,
+      "timeoutSeconds": 900,
+      "maxTurns": 30,
+      "graders": [
+        {
+          "name": "skill-fired",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "review-pr"
+          }
+        },
+        {
+          "name": "findings-are-structured",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "\"file\"\\s*:\\s*\"[^\"]+\"[\\s\\S]{0,80}?\"line\"\\s*:\\s*\\d+",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "p1-string-built-sql",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "book\\.ts[\\s\\S]{0,700}?(inject|interpolat|concaten|placeholder|parameteri)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "p2-length-boundary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "book\\.ts[\\s\\S]{0,700}?(>=|exactly 100|off-by-one)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "p3-trim",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "book\\.ts[\\s\\S]{0,700}?(trimStart|trailing)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "p4-route-order",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "api\\.ts[\\s\\S]{0,700}?(:id|unreachable|shadow|never reach)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "p5-validation-error-swallowed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "api\\.ts[\\s\\S]{0,700}?(400|validation error)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "p6-unescaped-html",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "search-results\\.ejs[\\s\\S]{0,700}?(<%-|unescaped|xss|escap)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "p7-test-weakened",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "book-search\\.test\\.ts[\\s\\S]{0,700}?(200, 400|toContain|weaken|loosen)",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "p8-schema-changed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "schema\\.sql",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "clean-header-not-flagged",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "Cache-Control|no-store",
+            "flags": "i",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "clean-null-check-not-flagged",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "raw === null",
+            "flags": "",
+            "match": "not_contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.343663095,
+            "judgeCostUsd": 0,
+            "durationSeconds": 94,
+            "startedAt": "2026-11-23T23:10:46.002Z",
+            "error": null,
+            "tracePath": "<tmp>/e-alWTag/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              },
+              {
+                "name": "findings-are-structured",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \"file\"\\s*:\\s*\"[^\"]+\"[\\s\\S]{0,80}?\"line\"\\s*:\\s*\\d+",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p1-string-built-sql",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(inject|interpolat|concaten|placeholder|parameteri)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p2-length-boundary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(>=|exactly 100|off-by-one)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p3-trim",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(trimStart|trailing)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p4-route-order",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched api\\.ts[\\s\\S]{0,700}?(:id|unreachable|shadow|never reach)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p5-validation-error-swallowed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched api\\.ts[\\s\\S]{0,700}?(400|validation error)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p6-unescaped-html",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched search-results\\.ejs[\\s\\S]{0,700}?(<%-|unescaped|xss|escap)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p7-test-weakened",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book-search\\.test\\.ts[\\s\\S]{0,700}?(200, 400|toContain|weaken|loosen)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p8-schema-changed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched schema\\.sql",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "clean-header-not-flagged",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "clean-null-check-not-flagged",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 5,
+            "costUsd": 0.30315197,
+            "judgeCostUsd": 0,
+            "durationSeconds": 77,
+            "startedAt": "2026-11-23T23:10:47.224Z",
+            "error": null,
+            "tracePath": "<tmp>/e-86L9Eu/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              },
+              {
+                "name": "findings-are-structured",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \"file\"\\s*:\\s*\"[^\"]+\"[\\s\\S]{0,80}?\"line\"\\s*:\\s*\\d+",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p1-string-built-sql",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(inject|interpolat|concaten|placeholder|parameteri)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p2-length-boundary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(>=|exactly 100|off-by-one)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p3-trim",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(trimStart|trailing)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p4-route-order",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched api\\.ts[\\s\\S]{0,700}?(:id|unreachable|shadow|never reach)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p5-validation-error-swallowed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched api\\.ts[\\s\\S]{0,700}?(400|validation error)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p6-unescaped-html",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched search-results\\.ejs[\\s\\S]{0,700}?(<%-|unescaped|xss|escap)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p7-test-weakened",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book-search\\.test\\.ts[\\s\\S]{0,700}?(200, 400|toContain|weaken|loosen)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p8-schema-changed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched schema\\.sql",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "clean-header-not-flagged",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "clean-null-check-not-flagged",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.28447711500000006,
+            "judgeCostUsd": 0,
+            "durationSeconds": 76,
+            "startedAt": "2026-11-23T23:10:58.976Z",
+            "error": null,
+            "tracePath": "<tmp>/e-DgcYxb/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              },
+              {
+                "name": "findings-are-structured",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \"file\"\\s*:\\s*\"[^\"]+\"[\\s\\S]{0,80}?\"line\"\\s*:\\s*\\d+",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p1-string-built-sql",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(inject|interpolat|concaten|placeholder|parameteri)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p2-length-boundary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(>=|exactly 100|off-by-one)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p3-trim",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(trimStart|trailing)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p4-route-order",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched api\\.ts[\\s\\S]{0,700}?(:id|unreachable|shadow|never reach)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p5-validation-error-swallowed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched api\\.ts[\\s\\S]{0,700}?(400|validation error)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p6-unescaped-html",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched search-results\\.ejs[\\s\\S]{0,700}?(<%-|unescaped|xss|escap)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p7-test-weakened",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book-search\\.test\\.ts[\\s\\S]{0,700}?(200, 400|toContain|weaken|loosen)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p8-schema-changed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched schema\\.sql",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "clean-header-not-flagged",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "clean-null-check-not-flagged",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 0.8181818181818182,
+            "passed": false,
+            "turns": 9,
+            "costUsd": 0.13454290000000002,
+            "judgeCostUsd": 0,
+            "durationSeconds": 19,
+            "startedAt": "2026-11-23T23:11:00.207Z",
+            "error": null,
+            "tracePath": "<tmp>/e-UHafOB/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "findings-are-structured",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \"file\"\\s*:\\s*\"[^\"]+\"[\\s\\S]{0,80}?\"line\"\\s*:\\s*\\d+",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p1-string-built-sql",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(inject|interpolat|concaten|placeholder|parameteri)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p2-length-boundary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(>=|exactly 100|off-by-one)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p3-trim",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(trimStart|trailing)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p4-route-order",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched api\\.ts[\\s\\S]{0,700}?(:id|unreachable|shadow|never reach)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p5-validation-error-swallowed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched api\\.ts[\\s\\S]{0,700}?(400|validation error)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p6-unescaped-html",
+                "passed": false,
+                "weight": 1,
+                "explanation": "pattern not found in last_message",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p7-test-weakened",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book-search\\.test\\.ts[\\s\\S]{0,700}?(200, 400|toContain|weaken|loosen)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p8-schema-changed",
+                "passed": false,
+                "weight": 1,
+                "explanation": "pattern not found in last_message",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "clean-header-not-flagged",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "clean-null-check-not-flagged",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 12,
+            "costUsd": 0.1624532,
+            "judgeCostUsd": 0,
+            "durationSeconds": 29,
+            "startedAt": "2026-11-23T23:11:19.655Z",
+            "error": null,
+            "tracePath": "<tmp>/e-Pp8SQS/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "findings-are-structured",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \"file\"\\s*:\\s*\"[^\"]+\"[\\s\\S]{0,80}?\"line\"\\s*:\\s*\\d+",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p1-string-built-sql",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(inject|interpolat|concaten|placeholder|parameteri)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p2-length-boundary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(>=|exactly 100|off-by-one)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p3-trim",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(trimStart|trailing)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p4-route-order",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched api\\.ts[\\s\\S]{0,700}?(:id|unreachable|shadow|never reach)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p5-validation-error-swallowed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched api\\.ts[\\s\\S]{0,700}?(400|validation error)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p6-unescaped-html",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched search-results\\.ejs[\\s\\S]{0,700}?(<%-|unescaped|xss|escap)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p7-test-weakened",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book-search\\.test\\.ts[\\s\\S]{0,700}?(200, 400|toContain|weaken|loosen)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p8-schema-changed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched schema\\.sql",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "clean-header-not-flagged",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "clean-null-check-not-flagged",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0.9090909090909091,
+            "passed": false,
+            "turns": 12,
+            "costUsd": 0.1622265,
+            "judgeCostUsd": 0,
+            "durationSeconds": 28,
+            "startedAt": "2026-11-23T23:11:48.735Z",
+            "error": null,
+            "tracePath": "<tmp>/e-5R7Za2/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "findings-are-structured",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \"file\"\\s*:\\s*\"[^\"]+\"[\\s\\S]{0,80}?\"line\"\\s*:\\s*\\d+",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p1-string-built-sql",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(inject|interpolat|concaten|placeholder|parameteri)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p2-length-boundary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(>=|exactly 100|off-by-one)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p3-trim",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book\\.ts[\\s\\S]{0,700}?(trimStart|trailing)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p4-route-order",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched api\\.ts[\\s\\S]{0,700}?(:id|unreachable|shadow|never reach)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p5-validation-error-swallowed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched api\\.ts[\\s\\S]{0,700}?(400|validation error)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p6-unescaped-html",
+                "passed": false,
+                "weight": 1,
+                "explanation": "pattern not found in last_message",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p7-test-weakened",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched book-search\\.test\\.ts[\\s\\S]{0,700}?(200, 400|toContain|weaken|loosen)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "p8-schema-changed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched schema\\.sql",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "clean-header-not-flagged",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "clean-null-check-not-flagged",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1,
+        "scoreWithout": 0.9090909090909092,
+        "passRateWithout": 0.3333333333333333,
+        "delta": 0.09090909090909083
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 2,
+    "casesPassed": 2,
+    "overallScore": 1,
+    "overallPassRate": 1,
+    "meanDelta": 0.045454545454545414
+  }
+}

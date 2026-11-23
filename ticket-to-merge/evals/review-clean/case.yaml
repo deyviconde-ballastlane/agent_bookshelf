@@ -1,0 +1,41 @@
+schema_version: "1.1"
+name: review-clean
+description: A branch with three harmless changes and no bug. The review should stay quiet.
+tags: [review, should-not-flag]
+runs: 3
+context:
+  scaffold_script: fixture.sh
+execution:
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Agent, Bash]
+  prompt: |
+    Review this branch against main before I merge it. It is a small cleanup on top of ticket BOOK-101, "Search books by title or author".
+
+    Acceptance criteria:
+    - A query matches title or author: partial, case-insensitive
+    - An empty query returns all books
+    - Input is trimmed; over 100 characters returns a validation error
+    - SQL is parameterised: no string-built queries
+    - Vitest covers each criterion; npm run test:run passes
+
+    Constraints:
+    - No schema changes
+    - No new dependencies
+    - Never touch bookshelf.db, seed.sql or .env
+    - Keep the interface as it is on main
+
+    Report only real defects: bugs, security problems, weakened tests and broken constraints. Reply with a JSON array of findings and nothing else. Each finding has file, line, severity, issue and evidence. Reply with [] if the branch is clean.
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: 'review-pr'
+  - name: reports-nothing
+    type: regex
+    pattern: '"file"\s*:'
+    match: not_contains
+    target: last_message
+  - name: says-clean
+    type: llm
+    criteria: "PASS if the reply reports no defects: an empty array, or a plain statement that nothing needs fixing. FAIL if the reply reports one or more bugs, security problems, weakened tests or broken constraints."
