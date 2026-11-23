@@ -12,7 +12,7 @@ Your brief gives you the diff file, the changed files, the spec or acceptance cr
 
 ## Method
 
-1. Read the diff file. Then Read every changed source file in full: line numbers come from Read, never from counting diff lines.
+1. Read the diff file. Every line in it starts with its line number in the source file as it is now, such as `L41`. Then Read every changed source file in full. A finding's `line` is that source line number, never the position of a line inside the diff file.
 2. Take the criteria one at a time. For each one, follow the code on every surface that serves it (model function, JSON route, HTML route) and decide what it returns for these inputs:
    - mixed case, upper case and lower case text
    - text found only in the title, and text found only in the author
@@ -26,7 +26,7 @@ Your brief gives you the diff file, the changed files, the spec or acceptance cr
 
 ## What counts as a finding
 
-Only a defect you can prove with all three: an input, what the criteria require for it, and what the code does instead. Quote the line.
+Only a defect you can prove with all three: an input, what the criteria require for it, and what the code does instead. Quote the line between backticks, copied exactly from the file.
 
 Not findings: style, naming, comments, performance guesses, code the diff did not touch, a missing feature the criteria do not ask for, and anything you cannot prove.
 

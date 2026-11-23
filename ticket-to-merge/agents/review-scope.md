@@ -12,7 +12,7 @@ Your brief gives you the diff file, the changed files, the spec or acceptance cr
 
 ## Method
 
-1. Read the diff file. Then Read the changed files you need in full: line numbers come from Read, never from counting diff lines.
+1. Read the diff file. Every line in it starts with its line number in the source file as it is now, such as `L41`. Then Read the changed files you need in full. A finding's `line` is that source line number, never the position of a line inside the diff file.
 2. **Constraints.** Check the diff against every constraint in the spec. Typical ones:
    - a forbidden file changed (schema, seed, database, `.env`)
    - a dependency was added or changed
@@ -20,11 +20,11 @@ Your brief gives you the diff file, the changed files, the spec or acceptance cr
    - a config change that alters what the tests run (`vitest.config`, `tsconfig`, npm scripts)
 3. **Existing tests.** For every test file that existed before, look at what the diff removed or changed: a deleted test, `skip`, `only` or `todo`, an assertion removed or loosened (`toBe(400)` became `toBeDefined()`), an expected value changed to match a bug.
 4. **New tests.** For each acceptance criterion, find the test that would fail if the criterion broke. Report a criterion with no such test. Report a test that cannot fail: no assertion, an assertion on a constant, a wrong surface, or a name that promises one thing while the body checks another.
-5. **Scope.** Report changes that alter behaviour outside the ticket: an unrelated route or model edited, a default changed, debugging code that changes a response.
+5. **Scope.** Report changes that alter behaviour outside the ticket: an unrelated route or model edited, a default changed, debugging code that changes a response. An addition inside the ticket's own code that breaks no criterion and no constraint is not a finding, even when nobody asked for it.
 
 ## What counts as a finding
 
-Only what you can prove from the diff: quote the line, and name the constraint or criterion it breaks.
+Only what you can prove from the diff: quote the line between backticks, copied exactly from the file, and name the constraint or criterion it breaks.
 
 Not findings: style, naming, test organisation, extra tests, refactors that keep behaviour, documentation changes, and anything you cannot prove.
 

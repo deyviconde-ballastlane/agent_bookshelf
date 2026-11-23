@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 // Deterministic first step of /review-pr. One command, no model tokens:
-//   1. finds the base and writes the diff to .ticket-to-merge/review.diff (git-ignored locally)
+//   1. finds the base and writes the diff to .ticket-to-merge/review.diff (git-ignored locally),
+//      with the real line number of the source file on every line
 //   2. lists the changed files and locates the spec
 //   3. checks the hard constraints that need no judgement (protected files, dependencies, skipped tests)
 //   4. runs the test suite once, if dependencies are installed
 // Prints one JSON object. Usage: node collect-diff.mjs [base-ref] [--no-tests]
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync, appendFileSync } from 'node:fs';
+import { existsSync, lstatSync, mkdirSync, readFileSync, writeFileSync, appendFileSync } from 'node:fs';
 import path from 'node:path';
 
 const args = process.argv.slice(2);
@@ -39,10 +40,38 @@ const changed = git('diff', '--no-color', '--name-status', mergeBase, ...pathspe
 
 const untracked = (tryGit('ls-files', '--others', '--exclude-standard', ...pathspec) ?? '').split('\n').filter(Boolean);
 for (const file of untracked) {
-  if (statSync(file).size > 200_000) continue;
+  const info = lstatSync(file);
+  if (!info.isFile() || info.size > 200_000) continue; // skip symlinks, folders and large files
   const body = spawnSync('git', ['diff', '--no-color', '--no-index', '-U10', '/dev/null', file], { encoding: 'utf8' }).stdout;
   diff += `\n${body}`;
   changed.push({ status: 'A', file });
+}
+
+// Reviewers read the diff with a tool that numbers the lines of the diff file itself, and those numbers
+// are easy to mistake for source lines. So every line of the diff carries its real line number in the
+// file as it is now (L41), and removed lines carry none.
+const changedLines = {};
+function annotate(unified) {
+  const out = [
+    '# Each line starts with its line number in the file as it is now, for example L41.',
+    '# Use that number in findings. Lines marked "-" were removed and have no number.',
+    '',
+  ];
+  let file = null;
+  let line = 0;
+  for (const row of unified.split('\n')) {
+    if (row.startsWith('diff --git ')) { file = null; line = 0; out.push('', `=== ${row.slice(11)} ===`); continue; }
+    if (row.startsWith('+++ ')) { file = row === '+++ /dev/null' ? null : row.slice(4).replace(/^b\//, ''); out.push(row); continue; }
+    const hunk = row.match(/^@@ -\d+(?:,\d+)? \+(\d+)/);
+    if (hunk) { line = Number(hunk[1]); out.push(row); continue; }
+    if (line === 0 || row.startsWith('\\')) { out.push(row); continue; } // file headers, "No newline" notes
+    if (row.startsWith('-')) { out.push(`       - ${row.slice(1)}`); continue; }
+    const added = row.startsWith('+');
+    if (added && file) (changedLines[file] ??= []).push(line);
+    out.push(`${`L${line}`.padEnd(6)} ${added ? '+' : ' '} ${row.slice(1)}`);
+    line++;
+  }
+  return out.join('\n');
 }
 
 // ---------- hard constraints: facts, not opinions ----------
@@ -126,7 +155,8 @@ try {
     appendFileSync(exclude, '\n.ticket-to-merge/\n');
   }
 } catch { /* a read-only .git only means the folder shows up in git status */ }
-writeFileSync('.ticket-to-merge/review.diff', `${diff}\n`);
+writeFileSync('.ticket-to-merge/review.diff', `${annotate(diff)}\n`);
+writeFileSync('.ticket-to-merge/changed-lines.json', `${JSON.stringify(changedLines)}\n`);
 
 console.log(JSON.stringify({
   base,

@@ -2,13 +2,13 @@
 name: review-pr
 description: Audit a branch's diff with read-only specialist reviewers and return verified JSON findings (file, line, severity, issue, evidence). Use when asked to review a PR, a branch or a diff for bugs, security problems or broken ticket constraints.
 argument-hint: "[base ref, default main]"
-allowed-tools: Bash(node *), Agent, Read, Grep, Glob
+allowed-tools: Bash(node *), Agent, Read, Grep, Glob, Write(.ticket-to-merge/**)
 model: sonnet
 ---
 
 # Review a branch
 
-You coordinate a read-only review. You dispatch, you relay, you print. You do not review the code yourself, you do not fix anything, and you edit no files.
+You coordinate a read-only review. You dispatch, you relay, you print. You do not review the code yourself and you do not fix anything. The only files you write are the working files under `.ticket-to-merge/`, which git ignores.
 
 Base ref from the user (may be empty): `$ARGUMENTS`
 
@@ -20,7 +20,7 @@ Run this one command, with the base ref if the user gave one:
 node "${CLAUDE_PLUGIN_ROOT}/scripts/collect-diff.mjs" <base ref>
 ```
 
-It writes the diff to `.ticket-to-merge/review.diff` and prints JSON: the changed files, the spec path, the test run, and `facts` (hard constraints a script already checked).
+It writes the diff to `.ticket-to-merge/review.diff`, with the real source line number on every line, and prints JSON: the changed files, the spec path, the test run, and `facts` (hard constraints a script already checked).
 
 - If the JSON has `error`, print the error and stop.
 - If `changedFiles` is empty, print `[]` and stop.
@@ -62,9 +62,17 @@ Try to refute each one. Return the surviving findings as a JSON array and nothin
 
 If there are no candidates at all, skip the verifier and print `[]`.
 
-## 5. Print the result
+## 5. Check the line numbers, then print
 
-Your whole reply is the verifier's array in one `json` code block. No text before it and none after it. Print `[]` for a clean review.
+Save the verifier's array, unchanged, to `.ticket-to-merge/findings.json`. Then run this one command:
+
+```
+node "${CLAUDE_PLUGIN_ROOT}/scripts/anchor-lines.mjs"
+```
+
+It checks every line number against the source file, corrects the ones that point at the wrong place, and prints the final array.
+
+Your whole reply is that printed array in one `json` code block. No text before it and none after it. Print `[]` for a clean review. If the file cannot be saved, print the verifier's array as it is.
 
 ```json
 [{"file": "src/models/book.ts", "line": 31, "severity": "high", "issue": "…", "evidence": "…"}]
@@ -88,3 +96,5 @@ Constraints:
 - No new dependencies
 - Never touch `bookshelf.db`, `seed.sql` or `.env`
 - Keep the interface exactly as specified
+
+The ticket does not say which endpoint or response shape to use. When you paste these criteria, add this line for the reviewers: "The interface is not specified. Do not report a route name or a response shape as wrong by itself. Report it only when it contradicts a route that already existed, or when two surfaces of the same search disagree."

@@ -1,7 +1,7 @@
 ---
 name: ship-ticket
 description: Take one ticket from its spec to merge-ready, with failing tests first, an implementation gated on a green suite, a read-only review and a fix loop. Use only when the user asks to ship or build a ticket that has a spec file.
-argument-hint: "[spec path, default SPEC.md] [build | review | fix]"
+argument-hint: "[spec path, default SPEC.md] [build | review | fix] [include-low]"
 disable-model-invocation: true
 model: sonnet
 ---
@@ -13,7 +13,8 @@ You coordinate. The agents write the tests and the code; you brief them, check t
 Arguments from the user (may be empty): `$ARGUMENTS`
 
 - The first argument that is a file path is the spec. Default: `SPEC.md`.
-- `build`, `review` or `fix` runs only that stage. With no stage word, run all three in order.
+- `build`, `review` or `fix` runs only that stage, and nothing else. With no stage word, run the three stages in order.
+- `include-low` makes the fix stage handle `low` findings too.
 
 ## Before any stage
 
@@ -50,23 +51,32 @@ The two agents run one after the other, never in parallel: the implementer needs
 
 ## Stage 2: review
 
-Invoke the `ticket-to-merge:review-pr` skill and follow it to the letter. It returns a JSON array of findings.
+Read `${CLAUDE_PLUGIN_ROOT}/skills/review-pr/SKILL.md` and follow its five steps exactly. It is the same procedure `/ticket-to-merge:review-pr` runs. It ends with a JSON array of findings, saved in `.ticket-to-merge/findings.json` and printed.
 
-Save that array to `.ticket-to-merge/findings.json`.
+That file names the plugin folder with a variable. Read as a plain file, the variable is not filled in, so use these exact commands for its steps 1 and 5, each as one Bash call with nothing added:
+
+```
+node "${CLAUDE_PLUGIN_ROOT}/scripts/collect-diff.mjs" main
+node "${CLAUDE_PLUGIN_ROOT}/scripts/anchor-lines.mjs"
+```
+
+After step 5, write the printed array back to `.ticket-to-merge/findings.json`, so the fix stage reads the corrected line numbers.
 
 ## Stage 3: fix
 
-Read `.ticket-to-merge/findings.json`. If it is `[]`, there is nothing to fix.
+Read `.ticket-to-merge/findings.json`. It holds the findings of the last review, so do not review again before fixing. If it is `[]`, there is nothing to fix.
 
-For the `high` and `medium` findings, all in one pass:
+Fix the `high` and `medium` findings. `low` findings are left for a human to decide, unless the user wrote `include-low`.
+
+All the findings go in one pass:
 
 1. **Prove.** Brief `ticket-to-merge:test-writer` in fix mode with the findings, verbatim. It writes one failing test per finding.
-2. A finding whose test passes is not reproduced. Drop it and say so in the final report.
-3. **Commit the tests**, then brief `ticket-to-merge:implementer` with the failing tests and the findings they prove.
+   - A finding about the code whose test passes is not reproduced. Drop it and say so in the final report.
+   - A finding about a missing or weak test is fixed by the test itself. That test should pass, and no implementer is needed for it.
+2. **Commit the tests**: `test: prove review findings`.
+3. If any test fails, brief `ticket-to-merge:implementer` with the failing tests and the findings they prove.
 4. **Confirm green yourself**, then commit: `fix: <what was wrong>`.
 5. **Review again**: run stage 2 once more. If findings remain after two fix rounds, stop and report them. Do not loop further.
-
-`low` findings are listed in the final report for a human to decide.
 
 ## Final report
 
