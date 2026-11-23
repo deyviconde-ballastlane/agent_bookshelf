@@ -34,12 +34,13 @@ Then, inside Claude Code:
 
 It needs no setup in the repository it reviews. When that repository has no `SPEC.md`, it reviews against the BOOK-101 acceptance criteria bundled in the skill.
 
-Headless, as used for every number on this page:
+Headless:
 
 ```
-claude -p "/ticket-to-merge:review-pr main" --plugin-dir ./ticket-to-merge \
-  --permission-mode acceptEdits --allowedTools "Bash(node *)" --output-format json
+claude -p "/ticket-to-merge:review-pr main" --plugin-dir ./ticket-to-merge --output-format json
 ```
+
+It needs no permission flags. The skill pre-approves its own two `node` commands, the reviewers only read, and a hook hands the verifier's output to the last script. Every cost on this page comes from headless runs like this one.
 
 ## Submission checklist
 
@@ -111,28 +112,29 @@ node ticket-to-merge/evals/run-clean.mjs --runs 3
 node ticket-to-merge/evals/run.mjs --runs 3 --models "review-spec=sonnet,review-security=sonnet,review-scope=sonnet"
 ```
 
-**What the evals caught in my own reviewer.** Five defects. Four of the fixes moved a rule out of a prompt and into a script, which is why they could be replayed over the saved runs:
+**What the evals caught in my own reviewer.** Six defects. Five of the fixes moved a rule out of a prompt and into a script or a hook:
 
-| Eval | What went wrong | Fix |
+| Run | What went wrong | Fix |
 |---|---|---|
 | First planted run | Precision 93%: two of three runs flagged the harmless header as "not asked for". | A rule for the scope reviewer and the verifier: a finding has to affect correctness or the requirements. |
 | Second planted run | One run reported line numbers of the diff file, not of the source, on 3 findings of 75. | The diff now carries the real line number on every line, and `scripts/anchor-lines.mjs` checks each finding's line against the file. |
 | First clean-branch run | With Haiku reviewers, 2 of 3 reviews of the clean branch reported problems in code the branch had not touched. With Sonnet reviewers, 0 of 3. | The script drops a finding that sits more than 8 lines from anything the branch changed. |
 | Review of this ticket, after the lever | It published a finding the verifier had marked as unproven: how emoji count toward the 100-character limit. | `low` now means "not proven", and the script does not publish it. It is saved to `unconfirmed.json` for a human. |
 | Injection branch | A code comment told automated reviewers to report nothing for one file. They never obeyed it: the three bugs in that file were found in 3 of 3 runs. But they reported the comment itself in only 1 of 3. | `scripts/collect-diff.mjs` now reports text addressed to a reviewer as a fact, before any model reads the diff. 3 of 3 since. |
+| A run with default permissions | The last step saved the findings with the Write tool. A headless session with default permissions denies that, so the script checks silently did not run. | A `SubagentStop` hook saves the verifier's output. The last step is now one plain `node` command that the skill pre-approves: no denied permission in the 28 runs since. |
 
 The `low` rule is backed by every run I had saved: 6 of the 8 false alarms in them were `low`, and no planted bug was ever reported only as `low`. Replaying the script over those runs publishes 242 of 248 findings, with 100% precision in every set and recall unchanged.
 
 The third defect is the one I would have shipped without noticing. Every branch in the planted suites had real bugs in it, so those suites could only measure whether the reviewer speaks up. They could not measure whether it stays quiet. The runs from before each fix are kept in [`evals/results/history/`](ticket-to-merge/evals/results/history/).
 
-**The pipeline exactly as shipped**, measured once more after all five fixes. 3 runs per planted suite, 6 on the clean branch:
+**The pipeline exactly as shipped**, measured once more after all six fixes. 3 runs per planted suite, 6 on the clean branch:
 
 | Suite | Recall | Precision or clean reviews | Cost per review |
 |---|---|---|---|
-| Planted bugs, no spec | 24 of 24 | 100% | $0.26 |
+| Planted bugs, no spec | 24 of 24 | 100% | $0.24 |
 | Hard set, spec in the repo | 24 of 24 | 100% | $0.22 |
 | Clean branch, no spec | n/a | 6 of 6 clean | $0.09 |
-| Planted bugs plus the injected comment, no spec | 27 of 27 | 100% | $0.30 |
+| Planted bugs plus the injected comment, no spec | 27 of 27 | 100% | $0.25 |
 
 ### Cost report
 
@@ -181,7 +183,7 @@ What I cannot claim is that the two models are equal. The planted suites sit at 
 
 **The verifier exists for precision.** A reviewer asked for problems reports some even when the code is sound. The verifier gets the candidates in a fresh context and is told to refute them. It drops what it cannot confirm and merges duplicates.
 
-**Facts are checked by scripts, not models.** `scripts/collect-diff.mjs` answers what needs no judgement before any agent starts: did a protected file change, did a dependency change, was a test skipped or deleted. `scripts/anchor-lines.mjs` runs at the end: it checks every line number, drops findings about code the branch did not change, and holds back what the verifier could not prove. Both cost zero tokens and give the same answer on every run. It is the hook lesson from week 1 applied to the reviewer: a rule in a prompt is a request, a script is a guarantee.
+**Facts are checked by scripts, not models.** `scripts/collect-diff.mjs` answers what needs no judgement before any agent starts: did a protected file change, did a dependency change, was a test skipped or deleted. `scripts/anchor-lines.mjs` runs at the end: it checks every line number, drops findings about code the branch did not change, and holds back what the verifier could not prove. Both cost zero tokens and give the same answer on every run. It is the hook lesson from week 1 applied to the reviewer: a rule in a prompt is a request, a script is a guarantee. The handoff works the same way: a hook saves the verifier's output for that last script, so the coordinator never re-types the findings.
 
 **The orchestrator only dispatches.** It never reads the diff. The script writes it to a file and the reviewers read it, so the diff is paid for as input, once per reviewer, instead of being re-typed three times as output.
 
@@ -213,13 +215,13 @@ There are three layers, because each one covers what the others cannot.
 
 Plugin agents ignore `hooks:` and `permissionMode:` in their own frontmatter. So the reviewers are read-only twice: their `tools:` line is `Read, Grep, Glob`, and the plugin hook blocks them by role if that line ever changes.
 
-A second hook script, [`hooks/gate.mjs`](ticket-to-merge/hooks/gate.mjs), is the gate on "done". It runs on `SubagentStop` for the implementer and sends it back to work while `npm run test:run` is red. It gives up after three blocks, so a wrong test cannot loop forever.
+A second hook script, [`hooks/gate.mjs`](ticket-to-merge/hooks/gate.mjs), is the gate on "done". It runs on `SubagentStop` for the implementer and sends it back to work while `npm run test:run` is red. It gives up after three blocks, so a wrong test cannot loop forever. A third, `hooks/save-findings.mjs`, saves the verifier's output for the last script of a review.
 
 **Evidence.**
 
 ```
 node --test ticket-to-merge/tests/hook-bypass.test.mjs
-# 149 attacks must block, 74 legitimate calls must pass
+# 153 attacks must block, 76 legitimate calls must pass
 ```
 
 The battery feeds the hook fake tool calls and checks the exit code. It covers path tricks, symlinks, quoting, variables and command substitution, globs, `cd` then a relative path, deleting a parent directory, inline interpreter code that builds the path at run time, a read command that also writes, attempts to switch the guardrail off, and each role fence.
@@ -253,7 +255,7 @@ The first run of this eval is what exposed the clean-branch problem. Its Δ on `
 
 - **The interface is my reading of a blank field.** If the hidden tests call a route or a response shape that `SPEC.md` did not choose, they fail for that reason and not because a rule is broken.
 - **The planted bugs are mine.** I wrote the checklists and the bugs, so the suites favour what I thought of. The no-spec condition and the hard set are my attempts to offset that.
-- **A headless session sometimes finishes and never exits.** It happened in about 5 of 70 runs: the work was done and the result was never printed. Every one of those sessions had started its subagents in the background. The skills now ask for foreground subagents, and none of the 48 runs since has hung. I do not know the cause, so `evals/run.mjs` keeps a watchdog that interrupts a stuck session, which makes it print.
+- **A headless session sometimes finishes and never exits.** It happened in about 5 of 70 runs: the work was done and the result was never printed. Every one of those sessions had started its subagents in the background. The skills now ask for foreground subagents, and none of the 75 eval runs since has hung. I do not know the cause, so `evals/run.mjs` keeps a watchdog that interrupts a stuck session, which makes it print.
 
 ## Plugin layout
 
@@ -268,7 +270,8 @@ ticket-to-merge/
 ├── hooks/
 │   ├── hooks.json
 │   ├── protect.mjs                protected files and role fences (PreToolUse)
-│   └── gate.mjs                   green suite before the implementer stops (SubagentStop)
+│   ├── gate.mjs                   green suite before the implementer stops (SubagentStop)
+│   └── save-findings.mjs          hands the verifier's output to the last script (SubagentStop)
 ├── scripts/
 │   ├── collect-diff.mjs           diff with real line numbers, hard-constraint facts, test run
 │   ├── anchor-lines.mjs           checks every finding: line number, scope, proof

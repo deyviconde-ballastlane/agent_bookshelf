@@ -2,13 +2,13 @@
 name: review-pr
 description: Audit a branch's diff with read-only specialist reviewers and return verified JSON findings (file, line, severity, issue, evidence). Use when asked to review a PR, a branch or a diff for bugs, security problems or broken ticket constraints.
 argument-hint: "[base ref, default main]"
-allowed-tools: Bash(node *), Agent, Read, Grep, Glob, Write(.ticket-to-merge/**)
+allowed-tools: Bash(node *), Agent, Read, Grep, Glob
 model: sonnet
 ---
 
 # Review a branch
 
-You coordinate a read-only review. You dispatch, you relay, you print. You do not review the code yourself and you do not fix anything. The only files you write are the working files under `.ticket-to-merge/`, which git ignores.
+You coordinate a read-only review. You dispatch, you relay, you print. You do not review the code yourself, you do not fix anything, and you edit no files. The two scripts keep their working files under `.ticket-to-merge/`, which git ignores.
 
 Base ref from the user (may be empty): `$ARGUMENTS`
 
@@ -60,19 +60,19 @@ Candidate findings: <the joined JSON array, verbatim>
 Try to refute each one. Return the surviving findings as a JSON array and nothing else.
 ```
 
-If there are no candidates at all, skip the verifier and print `[]`.
+If there are no candidates at all, skip the verifier and go straight to step 5. Do not comment on it.
 
 ## 5. Check lines and scope, then print
 
-Save the verifier's array, unchanged, to `.ticket-to-merge/findings.json`. Then run this one command:
+A hook saved the verifier's array to `.ticket-to-merge/verifier.json` when the verifier finished. If the verifier was skipped, that file holds `[]`. Either way, run this one command, exactly as written:
 
 ```
 node "${CLAUDE_PLUGIN_ROOT}/scripts/anchor-lines.mjs"
 ```
 
-It checks every line number against the source file and corrects the ones that point at the wrong place. It drops findings about code the branch did not change. It moves the unproven (`low`) findings to `.ticket-to-merge/unconfirmed.json`. Then it prints the final array. Do not add back anything it left out.
+The script reads that file. It checks every line number against the source file and corrects the ones that point at the wrong place. It drops findings about code the branch did not change. It holds back the unproven (`low`) findings in `.ticket-to-merge/unconfirmed.json`. Then it saves the final array to `.ticket-to-merge/findings.json` and prints it. Do not add back anything it left out.
 
-Your whole reply is that printed array in one `json` code block. No text before it and none after it. Print `[]` for a clean review. If the file cannot be saved, print the verifier's array as it is.
+Your whole reply is that printed array in one `json` code block. No text before it and none after it. Print `[]` for a clean review. If the command cannot run, your whole reply is the verifier's array as it is, in the same single code block, with no explanation.
 
 ```json
 [{"file": "src/models/book.ts", "line": 31, "severity": "high", "issue": "…", "evidence": "…"}]

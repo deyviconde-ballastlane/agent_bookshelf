@@ -112,9 +112,20 @@ function stripMessages(command) {
   return command;
 }
 
+// The plugin's last review step hands the findings to its own script on stdin. That text names protected
+// files and quotes dangerous code, so it must not be read as part of the command. Only one exact form is
+// exempt: the plugin's anchor-lines script, `-`, and a quoted heredoc. Whatever follows the closing
+// marker is still checked.
+function stripOwnInput(command) {
+  const script = path.join(import.meta.dirname, '../scripts/anchor-lines.mjs');
+  const forms = [...new Set([script, real(script)])].map((p) => slash(p).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const re = new RegExp(String.raw`^(\s*node\s+"?(?:${forms.join('|')})"?\s+-\s*)<<\s*'(\w+)'\n[\s\S]*?\n\2[ \t]*(?=\n|$)`, 'i');
+  return command.replace(re, '$1');
+}
+
 // Returns 'env', 'guarded' or null
 function scan(rawCommand) {
-  const command = stripMessages(rawCommand);
+  const command = stripOwnInput(stripMessages(rawCommand));
   // Undo quoting and escaping: se''ed.sql, "se"ed.sql and se\ed.sql all mean the same file
   const text = command.replace(/['"\\]/g, '').toLowerCase();
 

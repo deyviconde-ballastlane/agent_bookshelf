@@ -15,7 +15,7 @@ Capstone points at this level: recall 6.0 / 6, precision 4.0 / 4
 
 | Run | Cost | Cache hit | Wall time | Models |
 |---|---|---|---|---|
-| run-1.json | $0.28 | 73% | 84s | sonnet-5-5 $0.27, haiku-5-5 $0.01 |
-| run-2.json | $0.29 | 79% | 109s | sonnet-5-5 $0.27, haiku-5-5 $0.02 |
-| run-3.json | $0.21 | 82% | 78s | sonnet-5-5 $0.20, haiku-5-5 $0.01 |
-| **Mean** | **$0.26** | | **90s** | |
+| run-1.json | $0.26 | 71% | 79s | sonnet-5-5 $0.24, haiku-5-5 $0.02 |
+| run-2.json | $0.22 | 75% | 88s | sonnet-5-5 $0.20, haiku-5-5 $0.02 |
+| run-3.json | $0.24 | 75% | 82s | sonnet-5-5 $0.23, haiku-5-5 $0.01 |
+| **Mean** | **$0.24** | | **83s** | |

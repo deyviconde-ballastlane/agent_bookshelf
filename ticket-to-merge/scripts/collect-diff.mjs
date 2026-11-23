@@ -181,6 +181,8 @@ try {
 } catch { /* a read-only .git only means the folder shows up in git status */ }
 writeFileSync('.ticket-to-merge/review.diff', `${annotate(diff)}\n`);
 writeFileSync('.ticket-to-merge/changed-lines.json', `${JSON.stringify(changedLines)}\n`);
+// Every review starts from an empty result, so nothing from an earlier review can be published by mistake
+for (const name of ['verifier.json', 'findings.json', 'unconfirmed.json']) writeFileSync(path.join('.ticket-to-merge', name), '[]\n');
 
 console.log(JSON.stringify({
   base,

@@ -52,16 +52,14 @@ The two agents run one after the other, never in parallel: the implementer needs
 
 ## Stage 2: review
 
-Read `${CLAUDE_PLUGIN_ROOT}/skills/review-pr/SKILL.md` and follow its five steps exactly. It is the same procedure `/ticket-to-merge:review-pr` runs. It ends with a JSON array of findings, saved in `.ticket-to-merge/findings.json` and printed.
+Read `${CLAUDE_PLUGIN_ROOT}/skills/review-pr/SKILL.md` and follow its five steps exactly. It is the same procedure `/ticket-to-merge:review-pr` runs. Its last step saves the findings to `.ticket-to-merge/findings.json` and prints them.
 
-That file names the plugin folder with a variable. Read as a plain file, the variable is not filled in, so use these exact commands for its steps 1 and 5, each as one Bash call with nothing added:
+That file names the plugin folder with a variable. Read as a plain file, the variable is not filled in, so use these exact commands for its steps 1 and 5, each as one Bash call:
 
 ```
 node "${CLAUDE_PLUGIN_ROOT}/scripts/collect-diff.mjs" main
 node "${CLAUDE_PLUGIN_ROOT}/scripts/anchor-lines.mjs"
 ```
-
-After step 5, write the printed array back to `.ticket-to-merge/findings.json`, so the fix stage reads the corrected line numbers.
 
 ## Stage 3: fix
 

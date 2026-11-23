@@ -24,6 +24,16 @@
             "timeout": 180
           }
         ]
+      },
+      {
+        "matcher": "^ticket-to-merge:review-verifier$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/save-findings.mjs"]
+          }
+        ]
       }
     ]
   }

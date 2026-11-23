@@ -246,6 +246,23 @@ test('still blocks code hidden in a commit message', () => expectAll(2, [
   bash('git commit -m "x" && echo y >> .env'),
 ]));
 
+// ---------- the plugin's own last step: findings passed to its script as data ----------
+
+const ANCHOR = path.join(PLUGIN, 'scripts/anchor-lines.mjs');
+const FINDINGS = '[{"file":"src/db/seed.sql","line":3,"severity":"high","issue":"seed.sql changed; .env is read","evidence":"`rm -rf src/db` then `echo x > bookshelf.db`"}]';
+
+test('allows findings on stdin for the plugin\'s own script, whatever they quote', () => expectAll(0, [
+  bash(`node "${ANCHOR}" - <<'TTM_FINDINGS'\n${FINDINGS}\nTTM_FINDINGS`),
+  bash(`node ${ANCHOR} - <<'TTM_FINDINGS'\n[]\nTTM_FINDINGS`),
+]));
+
+test('still blocks what follows the findings, and the same trick with another script', () => expectAll(2, [
+  bash(`node "${ANCHOR}" - <<'TTM_FINDINGS'\n${FINDINGS}\nTTM_FINDINGS\nrm src/db/seed.sql`),
+  bash(`node "${ANCHOR}" - <<'TTM_FINDINGS'\n[]\nTTM_FINDINGS\necho X=1 >> .env`),
+  bash(`node /tmp/other.mjs - <<'TTM_FINDINGS'\n${FINDINGS}\nTTM_FINDINGS`),
+  bash(`node "${ANCHOR}" - <<TTM_FINDINGS\n$(rm src/db/seed.sql)\nTTM_FINDINGS`),
+]));
+
 // ---------- role fences: each plugin agent only does its own job ----------
 
 function expectRole(agent, expected, cases) {

@@ -12,23 +12,29 @@
 //
 // Findings in files the branch did not change at all are left for the verifier's judgement: a missing
 // test is often reported there. The script never invents a finding. What it moves or drops goes to stderr.
-// Usage: node anchor-lines.mjs [findings.json]     prints the final array
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+// Input: .ticket-to-merge/verifier.json, which the plugin's SubagentStop hook saves when the verifier
+// finishes. So the coordinator never re-types the findings and needs no permission to write a file.
+// The script saves what it publishes to .ticket-to-merge/findings.json and prints it.
+// Usage: node anchor-lines.mjs            or, with the array on stdin: node anchor-lines.mjs -
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 const NEAR = 3;
 const SCOPE = 8;
-const file = process.argv[2] || '.ticket-to-merge/findings.json';
+const fromStdin = process.argv[2] === '-';
+const file = '.ticket-to-merge/findings.json';
+const source = process.argv[2] && !fromStdin ? process.argv[2] : '.ticket-to-merge/verifier.json';
 const readJson = (p, fallback) => { try { return JSON.parse(readFileSync(p, 'utf8')); } catch { return fallback; } };
 
-let findings = readJson(file, null);
+let text = '';
+try { text = readFileSync(fromStdin ? 0 : source, 'utf8'); } catch { /* reported below */ }
+let findings = null;
+try { findings = JSON.parse(text); } catch { /* maybe wrapped in a code block or a sentence */ }
 if (!Array.isArray(findings)) {
-  // Tolerate a file that holds the array inside a code block or after a sentence
-  const text = existsSync(file) ? readFileSync(file, 'utf8') : '';
   try { findings = JSON.parse(text.slice(text.indexOf('['), text.lastIndexOf(']') + 1)); } catch { findings = null; }
 }
 if (!Array.isArray(findings)) {
-  console.error(`anchor-lines: ${file} does not hold a JSON array of findings.`);
+  console.error(`anchor-lines: ${fromStdin ? 'stdin' : source} does not hold a JSON array of findings.`);
   process.exit(1);
 }
 
@@ -72,7 +78,11 @@ for (const finding of findings) {
   else result.push(out);
 }
 
-try { writeFileSync(path.join(path.dirname(file), 'unconfirmed.json'), `${JSON.stringify(unconfirmed, null, 2)}\n`); } catch { /* read-only workspace */ }
+try {
+  mkdirSync(path.dirname(file), { recursive: true });
+  writeFileSync(file, `${JSON.stringify(result, null, 2)}\n`);
+  writeFileSync(path.join(path.dirname(file), 'unconfirmed.json'), `${JSON.stringify(unconfirmed, null, 2)}\n`);
+} catch { /* a read-only workspace only loses the saved copies */ }
 
 if (moved.length) console.error(`anchor-lines: corrected ${moved.length} line number(s): ${moved.join('; ')}`);
 if (outOfScope.length) console.error(`anchor-lines: dropped ${outOfScope.length} finding(s) about code this branch did not change:\n  ${outOfScope.join('\n  ')}`);

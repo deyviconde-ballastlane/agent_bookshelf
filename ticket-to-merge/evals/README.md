@@ -24,7 +24,7 @@ Each folder holds the raw `claude -p` output of every run and a `summary.md`.
 | `5-hard-sonnet`, `6-hard-haiku-specialists` | The hard set, both models |
 | `7-clean-haiku`, `7b-clean-haiku-six-more`, `8-clean-sonnet` | The clean branch, both models, after the scope check |
 | `9-shipped-planted-no-spec`, `9-shipped-hard`, `9-shipped-clean`, `9-shipped-injection` | Every suite with the plugin exactly as shipped |
-| `10-plugin-eval` | `claude plugin eval`: with the plugin and without it. Run before the last two prompt additions (untrusted input, searching for a test before calling it missing); the `9-shipped-*` folders were run after them. |
+| `10-plugin-eval` | `claude plugin eval`: with the plugin and without it. Run before the last changes to the reviewer (untrusted input, searching for a test before calling it missing, the hook handoff); the `9-shipped-*` folders were run after them. |
 | `history/` | Runs from before each fix, in order: `a` the first prompts, `b` and `c` the wrong line numbers, `d` the clean-branch false alarms, `e` the first plugin eval, `f` to `h` the steps in between |
 
 Folders 1 to 8 were measured before the last script checks existed. Those checks are deterministic, so they were replayed over the saved planted-bug runs: 242 of 248 findings are still published, recall is unchanged and precision is 100% in every set.
