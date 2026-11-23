@@ -111,6 +111,12 @@ curl http://localhost:3000/api/books
 # Get a specific book
 curl http://localhost:3000/api/books/1
 
+# Search books by title or author (case-insensitive, max 100 chars; 400 if invalid)
+curl "http://localhost:3000/api/books/search?q=dune"
+
+# Same search as an alias on the list route
+curl "http://localhost:3000/api/books?q=dune"
+
 # Add a review
 curl -X POST http://localhost:3000/api/reviews \
   -H "Content-Type: application/json" \
