@@ -94,6 +94,11 @@ describe('searchBooks (BOOK-101)', () => {
     expect(Book.searchBooks('zqxCase sa')).toHaveLength(1);
   });
 
+  it('rule 4: matches in the middle of a word (model)', () => {
+    add('Unzqxmidable Tales', 'Nobody');
+    expect(Book.searchBooks('zqxmid').map((b) => b.title)).toEqual(['Unzqxmidable Tales']);
+  });
+
   it('rule 4: matches inside the author, ignoring ASCII case (model)', () => {
     add('Plain Title', 'Ann Zqxauthor Smith');
     expect(Book.searchBooks('ZQXAUTHOR').map((b) => b.title)).toEqual(['Plain Title']);

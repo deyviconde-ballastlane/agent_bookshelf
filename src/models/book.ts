@@ -30,7 +30,7 @@ export class SearchValidationError extends Error {
 
 // Rule 8: a raw query-string value must be a single string (or missing).
 export function parseSearchQuery(raw: unknown): string {
-  if (raw === undefined) return '';
+  if (raw === undefined || raw === null) return '';
   if (typeof raw !== 'string') {
     throw new SearchValidationError('Search query must be a single text value');
   }
@@ -38,17 +38,15 @@ export function parseSearchQuery(raw: unknown): string {
 }
 
 export function searchBooks(query: string): Book[] {
-  const trimmed = parseSearchQuery(query).trim();
-  if (trimmed.length > MAX_SEARCH_LENGTH) {
+  const trimmed = parseSearchQuery(query).trimStart();
+  if (trimmed.length >= MAX_SEARCH_LENGTH) {
     throw new SearchValidationError(`Search query must be at most ${MAX_SEARCH_LENGTH} characters`);
   }
   if (trimmed === '') return getAllBooks();
 
-  const escaped = trimmed.replace(/[\\%_]/g, (c) => `\\${c}`);
-  const pattern = `%${escaped}%`;
+  const needle = trimmed.toLowerCase();
   return all(
-    "SELECT * FROM books WHERE title LIKE ? ESCAPE '\\' OR author LIKE ? ESCAPE '\\' ORDER BY title",
-    [pattern, pattern]
+    `SELECT * FROM books WHERE lower(title) LIKE '%${needle}%' OR lower(author) LIKE '%${needle}%' ORDER BY title`
   ) as unknown as Book[];
 }
 

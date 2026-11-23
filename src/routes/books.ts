@@ -12,6 +12,7 @@ router.get('/', (req: Request, res: Response) => {
 router.get('/books/search', (req: Request, res: Response) => {
   try {
     const books = Book.searchBooks(Book.parseSearchQuery(req.query.q));
+    res.set('Cache-Control', 'no-store');
     res.render('books/search-results', { books });
   } catch (err) {
     if (err instanceof Book.SearchValidationError) {
