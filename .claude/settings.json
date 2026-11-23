@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(/.env)",
+      "Edit(/.env)",
+      "Edit(/bookshelf.db)",
+      "Edit(/src/db/seed.sql)",
+      "Edit(/src/db/schema.sql)",
+      "Edit(/.claude/settings.json)",
+      "Edit(/.claude/settings.local.json)",
+      "Edit(/ticket-to-merge/hooks/**)"
+    ]
+  }
+}
