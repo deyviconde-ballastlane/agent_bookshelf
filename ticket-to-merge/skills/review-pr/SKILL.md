@@ -32,7 +32,7 @@ If `spec` has a path, the reviewers read that file. If it is `null`, use the fal
 
 ## 3. Dispatch three reviewers in parallel
 
-Send all three Agent calls in one message so they run at the same time:
+Send all three Agent calls in one message so they run at the same time. Set `run_in_background: false` on each call: you need their results in this same turn, not later.
 
 - `ticket-to-merge:review-spec`: behaviour against the acceptance criteria
 - `ticket-to-merge:review-security`: injection, validation, unsafe input handling
@@ -53,7 +53,7 @@ Return a JSON array of findings and nothing else.
 
 This step needs every result, because the same defect is often reported twice. Join the three arrays and the script's `facts` into one candidate list. Do not edit, drop or reword a candidate.
 
-Send the list to `ticket-to-merge:review-verifier` with the same brief plus:
+Send the list to `ticket-to-merge:review-verifier`, also with `run_in_background: false`, with the same brief plus:
 
 ```
 Candidate findings: <the joined JSON array, verbatim>
@@ -70,7 +70,7 @@ Save the verifier's array, unchanged, to `.ticket-to-merge/findings.json`. Then 
 node "${CLAUDE_PLUGIN_ROOT}/scripts/anchor-lines.mjs"
 ```
 
-It checks every line number against the source file and corrects the ones that point at the wrong place. It drops findings about code the branch did not change. Then it prints the final array. Do not add back anything it dropped.
+It checks every line number against the source file and corrects the ones that point at the wrong place. It drops findings about code the branch did not change. It moves the unproven (`low`) findings to `.ticket-to-merge/unconfirmed.json`. Then it prints the final array. Do not add back anything it left out.
 
 Your whole reply is that printed array in one `json` code block. No text before it and none after it. Print `[]` for a clean review. If the file cannot be saved, print the verifier's array as it is.
 

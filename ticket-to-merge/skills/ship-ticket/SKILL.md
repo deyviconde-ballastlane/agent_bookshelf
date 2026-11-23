@@ -14,6 +14,7 @@ Arguments from the user (may be empty): `$ARGUMENTS`
 
 - The first argument that is a file path is the spec. Default: `SPEC.md`.
 - `build`, `review` or `fix` runs only that stage, and nothing else. With no stage word, run the three stages in order.
+- Every Agent call in this skill sets `run_in_background: false`: each step needs the result of the one before it.
 - `include-low` makes the fix stage handle `low` findings too.
 
 ## Before any stage
@@ -66,7 +67,7 @@ After step 5, write the printed array back to `.ticket-to-merge/findings.json`, 
 
 Read `.ticket-to-merge/findings.json`. It holds the findings of the last review, so do not review again before fixing. If it is `[]`, there is nothing to fix.
 
-Fix the `high` and `medium` findings. `low` findings are left for a human to decide, unless the user wrote `include-low`.
+Fix the findings in that file: they are the `high` and `medium` ones. The review saves what it could not prove (`low`) to `.ticket-to-merge/unconfirmed.json`. Leave those for a human to decide, unless the user wrote `include-low`: then fix them too.
 
 All the findings go in one pass:
 
@@ -88,4 +89,4 @@ Evidence, not claims:
 | Review | number of findings by severity, and the array |
 | Fix | each finding: proved by which test, fixed in which commit, or dropped and why |
 
-Then the commits you made (`git log --oneline main..HEAD`) and what is left for a human: open findings, pushing the branch and opening the pull request. Do not push and do not open the pull request yourself.
+Then the commits you made (`git log --oneline main..HEAD`) and what is left for a human: open findings, the unproven ones in `.ticket-to-merge/unconfirmed.json`, pushing the branch and opening the pull request. Do not push and do not open the pull request yourself.

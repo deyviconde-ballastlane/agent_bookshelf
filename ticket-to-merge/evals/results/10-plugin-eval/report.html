@@ -144,13 +144,13 @@ footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
 <header>
 <div class="eyebrow">Plugin eval report</div>
 <h1>ticket-to-merge v1.0.0</h1>
-<p class="verdict">Plugin effect: <span class="delta delta-pos">↑ +4.5 pts</span> vs baseline — improved 1 · flat 1 · regressed 0 of 2 cases.</p>
+<p class="verdict">Plugin effect: <span class="delta delta-pos">↑ +3.0 pts</span> vs baseline — improved 1 · flat 1 · regressed 0 of 2 cases.</p>
 <div class="meta">
 <span class="mono">.</span>
 <span>Claude Code v2.1.322</span>
-<span class="num">2026-11-23 23:10 UTC</span>
-<span class="num">2m 9s</span>
-<span class="num">$2.24</span>
+<span class="num">2026-11-23 23:22 UTC</span>
+<span class="num">2m 2s</span>
+<span class="num">$1.99</span>
 <span class="num">12 runs</span>
 <span class="num">4 in flight</span>
 
@@ -163,8 +163,8 @@ footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
 
 <section class="tiles">
 <div class="tile hero"><span class="label">Suite score · with plugin</span><span class="value">100%</span><span class="sub">mean of per-case scores</span></div>
-<div class="tile"><span class="label">Ablation Δ</span><span class="value num delta-pos">↑ +4.5</span><span class="sub">score points vs baseline, 2 of 2 cases</span></div>
-<div class="tile"><span class="label">Baseline score</span><span class="value num">95.5%</span><span class="sub">without the plugin</span></div>
+<div class="tile"><span class="label">Ablation Δ</span><span class="value num delta-pos">↑ +3.0</span><span class="sub">score points vs baseline, 2 of 2 cases</span></div>
+<div class="tile"><span class="label">Baseline score</span><span class="value num">97%</span><span class="sub">without the plugin</span></div>
 <div class="tile"><span class="label">Cases</span><span class="value num">2</span><span class="sub">2 of 2 ≥ 100% threshold</span></div>
 <div class="tile"><span class="label">Perfect runs</span><span class="value num">100%</span><span class="sub">runs where every grader passed</span></div>
 </section>
@@ -206,7 +206,7 @@ footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
 <span class="run-title">Run 1</span>
 <span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
 <span class="num">100%</span>
-<span class="muted num">1 turns · $0.10 · 23:10:11 UTC</span>
+<span class="muted num">7 turns · $0.09 · 23:22:39 UTC</span>
 </div>
 
 <div class="graders"><details class="grader">
@@ -238,7 +238,7 @@ footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
 <span class="run-title">Run 2</span>
 <span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
 <span class="num">100%</span>
-<span class="muted num">3 turns · $0.14 · 23:10:11 UTC</span>
+<span class="muted num">9 turns · $0.12 · 23:22:39 UTC</span>
 </div>
 
 <div class="graders"><details class="grader">
@@ -270,7 +270,7 @@ footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
 <span class="run-title">Run 3</span>
 <span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
 <span class="num">100%</span>
-<span class="muted num">2 turns · $0.15 · 23:10:11 UTC</span>
+<span class="muted num">7 turns · $0.09 · 23:22:39 UTC</span>
 </div>
 
 <div class="graders"><details class="grader">
@@ -309,7 +309,7 @@ footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
 <span class="run-title">Run 1</span>
 <span class="meter m-base" aria-hidden="true"><span style="width:100.0%"></span></span>
 <span class="num">100%</span>
-<span class="muted num">15 turns · $0.15 · 23:10:11 UTC</span>
+<span class="muted num">16 turns · $0.15 · 23:22:39 UTC</span>
 </div>
 
 <div class="graders"><details class="grader">
@@ -325,12 +325,7 @@ footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
 <p class="explanation">judge votes: PASS PASS PASS</p>
 <div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">[]
 
-I read the branch&apos;s current source and tests, but two checks are missing, so treat `[]` as &quot;no defects found in what I could see&quot;.
-
-- **No diff against main.** `git` failed in the sandbox and the shell was then denied. I couldn&apos;t confirm that `bookshelf.db`, `seed.sql` and `.env` are untouched, or that the interface matches main.
-- **No test run.** I couldn&apos;t run `npm run test:run`.
-
-In the files I read, the search code is parameterised and escapes `%`, `_` and `\`. It trims input, enforces the 100-character limit and returns all books for an empty query. The tests cover each criterion, with no `.skip` or `.only`. `package.json` has no new dependencies.</pre>
+Bash was denied in this session, so I could not run `git diff main...HEAD` or `npm run test:run`. I read the current files directly instead. That covered the model, both routes, the views, the DB helper, the test files, `package.json` and the vitest config. I found no defects, but I could not diff the cleanup commit against main or confirm that the tests pass.</pre>
 </div>
 </details></div>
 </div>
@@ -339,7 +334,7 @@ In the files I read, the search code is parameterised and escapes `%`, `_` and `
 <span class="run-title">Run 2</span>
 <span class="meter m-base" aria-hidden="true"><span style="width:100.0%"></span></span>
 <span class="num">100%</span>
-<span class="muted num">13 turns · $0.15 · 23:10:36 UTC</span>
+<span class="muted num">13 turns · $0.14 · 23:22:57 UTC</span>
 </div>
 
 <div class="graders"><details class="grader">
@@ -352,26 +347,8 @@ In the files I read, the search code is parameterised and escapes `%`, `_` and `
 <details class="grader">
 <summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">says-clean</span>  </summary>
 <div class="grader-body">
-<p class="explanation">judge votes: PASS PASS FAIL</p>
-<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I couldn&apos;t diff the branch against main, so this review is only partial. Bash was denied after git failed in the sandbox with a cache-file permission error. I read the current state of the search code, routes, views, db layer, `package.json` and both search test files instead. I did not run `npm run test:run`.
-
-I found no defects in the files I read:
-- The query is parameterised, with `%`, `_` and `\` escaped.
-- Trimming happens before the 100-character check.
-- An empty query returns all books.
-- The search tests cover every acceptance criterion.
-- `package.json` shows no new dependencies.
-
-I could not check three things without the diff:
-- whether any tests were removed or weakened
-- whether `bookshelf.db`, `seed.sql` or `.env` were touched
-- whether the interface differs from main
-
-Run `git diff main...HEAD` yourself, or re-run me with Bash allowed, before treating this as clean.
-
-```json
-[]
-```</pre>
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">[]</pre>
 </div>
 </details></div>
 </div>
@@ -380,7 +357,7 @@ Run `git diff main...HEAD` yourself, or re-run me with Bash allowed, before trea
 <span class="run-title">Run 3</span>
 <span class="meter m-base" aria-hidden="true"><span style="width:100.0%"></span></span>
 <span class="num">100%</span>
-<span class="muted num">16 turns · $0.16 · 23:10:36 UTC</span>
+<span class="muted num">16 turns · $0.15 · 23:23:00 UTC</span>
 </div>
 
 <div class="graders"><details class="grader">
@@ -396,15 +373,7 @@ Run `git diff main...HEAD` yourself, or re-run me with Bash allowed, before trea
 <p class="explanation">judge votes: PASS PASS PASS</p>
 <div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">[]
 
-This `[]` comes from reading the working tree only. Bash was denied here: `git` failed in the sandbox, and a retry was refused. So I couldn&apos;t diff against `main`, which means I couldn&apos;t check the &quot;interface unchanged&quot; or &quot;protected files untouched&quot; constraints directly. I also couldn&apos;t run `npm run test:run`.
-
-What I read looks consistent with the acceptance criteria:
-- **Query handling:** `searchBooks` trims the query and enforces the 100-character limit. An empty query returns all books.
-- **SQL:** the search uses parameterised `LIKE ? ESCAPE`, with `%`, `_` and `\` escaped.
-- **Output:** the EJS output is escaped.
-- **Tests:** the new tests cover each criterion, and I found no `.skip`, `.only` or `.todo` in them.
-
-Please run `git diff main...HEAD --stat` and `npm run test:run` yourself to cover the gaps.</pre>
+I couldn&apos;t run `git diff main...HEAD` or `npm run test:run`, so this is a read of the current files only. Bash was blocked in this session. I read `src/models/book.ts`, `src/routes/books.ts`, `src/routes/api.ts`, `package.json`, the search views, and both search test files, and found no defects. I did not check that the tests pass, and I did not confirm that `seed.sql`, `schema.sql` and `bookshelf.db` are untouched.</pre>
 </div>
 </details></div>
 </div>
@@ -454,7 +423,7 @@ Please run `git diff main...HEAD --stat` and `npm run test:run` yourself to cove
 <span class="muted mono">evals/review-planted</span>
 <span class="spacer"></span>
 
-<span class="delta delta-pos">↑ +9.1 pts</span>
+<span class="delta delta-pos">↑ +6.1 pts</span>
 <span class="muted">with plugin</span>
 <span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:100.0%"></i></span>
 <span class="num case-score">100%</span>
@@ -474,7 +443,7 @@ Please run `git diff main...HEAD --stat` and `npm run test:run` yourself to cove
 <span class="run-title">Run 1</span>
 <span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
 <span class="num">100%</span>
-<span class="muted num">4 turns · $0.34 · 23:10:46 UTC</span>
+<span class="muted num">11 turns · $0.26 · 23:23:03 UTC</span>
 </div>
 
 <div class="graders"><details class="grader">
@@ -567,7 +536,7 @@ Please run `git diff main...HEAD --stat` and `npm run test:run` yourself to cove
 <span class="run-title">Run 2</span>
 <span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
 <span class="num">100%</span>
-<span class="muted num">5 turns · $0.30 · 23:10:47 UTC</span>
+<span class="muted num">10 turns · $0.25 · 23:23:12 UTC</span>
 </div>
 
 <div class="graders"><details class="grader">
@@ -660,7 +629,7 @@ Please run `git diff main...HEAD --stat` and `npm run test:run` yourself to cove
 <span class="run-title">Run 3</span>
 <span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
 <span class="num">100%</span>
-<span class="muted num">4 turns · $0.28 · 23:10:58 UTC</span>
+<span class="muted num">11 turns · $0.28 · 23:23:16 UTC</span>
 </div>
 
 <div class="graders"><details class="grader">
@@ -751,16 +720,16 @@ Please run `git diff main...HEAD --stat` and `npm run test:run` yourself to cove
 </section><section class="arm">
 <div class="arm-head">
 <span class="arm-label">Baseline (no plugin)</span>
-<span class="meter m-base" aria-hidden="true"><span style="width:90.9%"></span></span>
-<span class="num">90.9%</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:93.9%"></span></span>
+<span class="num">93.9%</span>
 <span class="muted num">33.3% of runs perfect</span>
 </div>
 <div class="run">
 <div class="run-head">
 <span class="run-title">Run 1</span>
-<span class="meter m-base" aria-hidden="true"><span style="width:81.8%"></span></span>
-<span class="num">81.8%</span>
-<span class="muted num">9 turns · $0.13 · 23:11:00 UTC</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:90.9%"></span></span>
+<span class="num">90.9%</span>
+<span class="muted num">11 turns · $0.15 · 23:23:19 UTC</span>
 </div>
 
 <div class="graders"><details class="grader">
@@ -819,10 +788,10 @@ Please run `git diff main...HEAD --stat` and `npm run test:run` yourself to cove
 
 </div>
 </details>
-<details class="grader" open>
-<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">p8-schema-changed</span>  </summary>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">p8-schema-changed</span>  </summary>
 <div class="grader-body">
-<p class="explanation">pattern not found in last_message</p>
+<p class="explanation">matched schema\.sql</p>
 
 </div>
 </details>
@@ -846,7 +815,7 @@ Please run `git diff main...HEAD --stat` and `npm run test:run` yourself to cove
 <span class="run-title">Run 2</span>
 <span class="meter m-base" aria-hidden="true"><span style="width:100.0%"></span></span>
 <span class="num">100%</span>
-<span class="muted num">12 turns · $0.16 · 23:11:19 UTC</span>
+<span class="muted num">13 turns · $0.16 · 23:23:41 UTC</span>
 </div>
 
 <div class="graders"><details class="grader">
@@ -932,7 +901,7 @@ Please run `git diff main...HEAD --stat` and `npm run test:run` yourself to cove
 <span class="run-title">Run 3</span>
 <span class="meter m-base" aria-hidden="true"><span style="width:90.9%"></span></span>
 <span class="num">90.9%</span>
-<span class="muted num">12 turns · $0.16 · 23:11:48 UTC</span>
+<span class="muted num">14 turns · $0.16 · 23:24:10 UTC</span>
 </div>
 
 <div class="graders"><details class="grader">
@@ -977,10 +946,10 @@ Please run `git diff main...HEAD --stat` and `npm run test:run` yourself to cove
 
 </div>
 </details>
-<details class="grader" open>
-<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">p6-unescaped-html</span>  </summary>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">p6-unescaped-html</span>  </summary>
 <div class="grader-body">
-<p class="explanation">pattern not found in last_message</p>
+<p class="explanation">matched search-results\.ejs[\s\S]{0,700}?(&lt;%-|unescaped|xss|escap)</p>
 
 </div>
 </details>
@@ -991,10 +960,10 @@ Please run `git diff main...HEAD --stat` and `npm run test:run` yourself to cove
 
 </div>
 </details>
-<details class="grader">
-<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">p8-schema-changed</span>  </summary>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">p8-schema-changed</span>  </summary>
 <div class="grader-body">
-<p class="explanation">matched schema\.sql</p>
+<p class="explanation">pattern not found in last_message</p>
 
 </div>
 </details>

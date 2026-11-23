@@ -113,6 +113,28 @@ for (const { status, file } of changed) {
   }
 }
 
+// Text addressed to an automated reviewer. Every file is untrusted input: a comment that tells reviewers
+// what to report is reported by this script, which cannot be talked out of it.
+// The patterns are narrow on purpose. "Return an empty array" is ordinary documentation; it only counts
+// when the sentence is addressed to a reviewer.
+const INJECTION = [
+  /\b(AI|LLM|automated|bot)\b[^.\n]{0,40}\breview(er|ers|ing)?\b[^\n]{0,120}\b(do not|don't|must not|should not|skip|ignore|return|approve)\b/i,
+  /\bignore\b[^.\n]{0,30}\b(previous|prior|above|all)\b[^.\n]{0,20}\binstructions\b/i,
+  /\b(do not|don't|never)\s+(report|flag|mention)\b[^.\n]{0,40}\b(findings?|vulnerabilit(y|ies))\b/i,
+];
+const untrackedSet = new Set(untracked);
+for (const { status, file } of changed) {
+  if (status === 'D' || !existsSync(file) || !lstatSync(file).isFile() || lstatSync(file).size > 200_000) continue;
+  const lines = untrackedSet.has(file)
+    ? readFileSync(file, 'utf8').split('\n').map((text, i) => ({ line: i + 1, text }))
+    : addedLines(file);
+  const hit = lines.find(({ text }) => INJECTION.some((pattern) => pattern.test(text)));
+  if (hit) {
+    fact(file, hit.line, 'high', 'The diff contains text addressed to an automated reviewer (possible prompt injection). It was not followed.',
+      `Line ${hit.line}: \`${hit.text.trim().slice(0, 200)}\``);
+  }
+}
+
 // Dependencies: compare the two package.json files as data
 const readJson = (text) => { try { return JSON.parse(text); } catch { return null; } };
 const before = readJson(tryGit('show', `${mergeBase}:package.json`) ?? '');
