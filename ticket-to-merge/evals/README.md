@@ -24,6 +24,7 @@ Each folder holds the raw `claude -p` output of every run and a `summary.md`.
 | `5-hard-sonnet`, `6-hard-haiku-specialists` | The hard set, both models |
 | `7-clean-haiku`, `7b-clean-haiku-six-more`, `8-clean-sonnet` | The clean branch, both models, after the scope check |
 | `9-shipped-planted-no-spec`, `9-shipped-hard`, `9-shipped-clean`, `9-shipped-injection` | Every suite with the plugin exactly as shipped |
+| `11-grader-rehearsal-planted` | Planted bugs reviewed against upstream `main`, so the diff is the whole feature plus the plants, the way a grader's branch looks (`run.mjs --from-upstream`) |
 | `10-plugin-eval` | `claude plugin eval`: with the plugin and without it. Run before the last changes to the reviewer (untrusted input, searching for a test before calling it missing, the hook handoff); the `9-shipped-*` folders were run after them. |
 | `history/` | Runs from before each fix, in order: `a` the first prompts, `b` and `c` the wrong line numbers, `d` the clean-branch false alarms, `e` the first plugin eval, `f` to `h` the steps in between |
 

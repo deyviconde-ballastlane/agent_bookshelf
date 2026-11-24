@@ -8,6 +8,8 @@
 // Usage: node ticket-to-merge/evals/run.mjs [--runs 3] [--label baseline]
 //          [--models review-spec=haiku,review-scope=haiku]   rewrite `model:` in a copy of the agents (a cost lever)
 //          [--manifest planted-bugs-hard.json]   score against another answer key (and its branch)
+//          [--from-upstream]   the base is upstream `main`, so the diff is the whole feature plus the plants,
+//                              the way a grader's branch looks
 //          [--no-spec]      drop SPEC.md and CLAUDE.md, so the review falls back to the bare ticket criteria
 //          [--with-tests]   install-free test evidence: link node_modules so the script can run the suite
 // Output: evals/results/<label>/run-N.json (raw `claude -p` output) and summary.md
@@ -25,6 +27,7 @@ const runs = Number(arg('runs', 3));
 const label = arg('label', 'baseline');
 const models = arg('models', '');
 const withSpec = !flag('no-spec');
+const fromUpstream = flag('from-upstream');
 const withTests = flag('with-tests');
 // With tests, the suites share database files under /tmp, so the runs must not start together
 const STAGGER_MS = withTests ? 30_000 : 2_000;
@@ -56,7 +59,7 @@ mkdirSync(work);
 git(work, 'init', '-q', '-b', 'main');
 git(work, 'config', 'user.name', 'eval');
 git(work, 'config', 'user.email', 'eval@example.com');
-const forkPoint = git(repo, 'merge-base', manifest.base, manifest.branch);
+const forkPoint = fromUpstream ? git(repo, 'rev-parse', 'main') : git(repo, 'merge-base', manifest.base, manifest.branch);
 const leaveOut = ['ticket-to-merge', '.claude', 'bookshelf.db-shm', 'bookshelf.db-wal', ...(withSpec ? [] : ['SPEC.md', 'CLAUDE.md'])];
 function commitTree(ref, message) {
   for (const entry of readdirSync(work)) if (entry !== '.git') rmSync(path.join(work, entry), { recursive: true, force: true });
@@ -65,7 +68,7 @@ function commitTree(ref, message) {
   git(work, 'add', '-A');
   git(work, 'commit', '-q', '-m', message);
 }
-commitTree(forkPoint, 'BOOK-101: search books by title or author');
+commitTree(forkPoint, fromUpstream ? 'upstream main' : 'BOOK-101: search books by title or author');
 git(work, 'checkout', '-q', '-b', 'review/search-tidy');
 commitTree(manifest.branch, 'search: tidy up query handling, routes and tests');
 if (withTests && existsSync(path.join(repo, 'node_modules'))) symlinkSync(path.join(repo, 'node_modules'), path.join(work, 'node_modules'));
@@ -128,7 +131,7 @@ try {
   const summary = [
     `# Planted-bug eval: ${label}`,
     '',
-    `Branch \`${manifest.branch}\` against its fork point. Spec in the repository: ${withSpec ? 'yes' : 'no, bare ticket criteria'}. Model overrides: ${models || 'none'}. Test output given to the reviewers: ${withTests ? 'yes' : 'no'}.`,
+    `Branch \`${manifest.branch}\` against its fork point. Spec in the repository: ${withSpec ? 'yes' : 'no, bare ticket criteria'}. Base: ${fromUpstream ? 'upstream main, so the diff is the whole feature plus the plants' : 'the fork point, so the diff is only the plants'}. Model overrides: ${models || 'none'}. Test output given to the reviewers: ${withTests ? 'yes' : 'no'}.`,
     '',
     score.trim(),
     '',

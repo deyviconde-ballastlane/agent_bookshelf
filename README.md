@@ -135,6 +135,7 @@ The third defect is the one I would have shipped without noticing. Every branch 
 | Hard set, spec in the repo | 24 of 24 | 100% | $0.22 |
 | Clean branch, no spec | n/a | 6 of 6 clean | $0.09 |
 | Planted bugs plus the injected comment, no spec | 27 of 27 | 100% | $0.25 |
+| Planted bugs with the whole feature in the diff (base: upstream `main`), no spec | 24 of 24 | 100% | $0.25 |
 
 ### Cost report
 
